@@ -2,6 +2,7 @@ import React from 'react';
 import MD5  from"react-native-md5";
 import HTML from 'react-native-render-html';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import ScaledImage from '../components/ScaledImage'
 import {ScrollView, Modal, View, FlatList ,ActivityIndicator, Text, StyleSheet, Image, TouchableWithoutFeedback, Dimensions, ImageBackground, StatusBar, Linking } from 'react-native';
 
 const images = []
@@ -42,7 +43,6 @@ export default class NewsScreen extends React.Component {
         const { name } = node;
         if(name=='a'){
             node.attribs.href = node.attribs.href.replace("browser://", "")
-            console.log(node.attribs);
         }
         node.attribs = { ...(node.attribs || {}), style: `line-height: 28%; font-size: 18%` };
     }
@@ -71,7 +71,7 @@ export default class NewsScreen extends React.Component {
                     images.push({url:htmlAttribs.src})
                 return (
                     <TouchableWithoutFeedback key={htmlAttribs.src} onPress={() =>this.setState({ modalVisible: true, index:i })}>
-                        <Image key={htmlAttribs.src} source={{uri: htmlAttribs.src}}  resizeMode='contain' style={{width:w,height:600, marginBottom: 10}}/>             
+                        <ScaledImage uri={htmlAttribs.src} width={w}/>             
                     </TouchableWithoutFeedback>
                     
                 ) 
@@ -93,7 +93,7 @@ export default class NewsScreen extends React.Component {
     render() {
         if(this.state.isLoading){
             return(
-              <View style={{flex: 1, padding: 20}}>
+              <View style={{flex: 1, padding: 50}}>
                 <ActivityIndicator color ="#C01E2F"/>
               </View>
             )
@@ -104,7 +104,6 @@ export default class NewsScreen extends React.Component {
             <Modal
                 visible={this.state.modalVisible}
                 transparent={false}
-                style={{height: Dimensions.get("window").height}}
                 onRequestClose={() => this.setState({ modalVisible: false })}
             >
                 <ImageViewer
@@ -137,7 +136,7 @@ export default class NewsScreen extends React.Component {
                     </ImageBackground>
                     <FlatList
                         data={this.state.replySource.light_comments}
-                        keyExtractor={item => item.ncid} 
+                        keyExtractor={(item, index) => 'key'+index}
                         renderItem={({item}) =>
                         <View style={styles.card}>
                             <Image source={{uri: item.header}} style={{width: 30, height: 30, marginRight:5, borderRadius:50}}/>
@@ -173,7 +172,7 @@ export default class NewsScreen extends React.Component {
                     </ImageBackground>
                     <FlatList
                         data={this.state.replySource.data}
-                        keyExtractor={item => item.ncid} 
+                        keyExtractor={(item, index) => 'key'+index}
                         renderItem={({item}) =>
                         <View style={styles.card}>
                             <Image source={{uri: item.header}} style={{width: 30, height: 30, marginRight:5, borderRadius:50}}/>

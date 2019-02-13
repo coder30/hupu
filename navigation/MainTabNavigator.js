@@ -1,14 +1,17 @@
 import React from 'react';
 import { Platform } from 'react-native';
-import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
+import { createStackNavigator, createBottomTabNavigator} from 'react-navigation';
+import CardStackStyleInterpolator from 'react-navigation-stack/src/views/StackView/StackViewStyleInterpolator';
 
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
-import LinksScreen from '../screens/LinksScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import  PostScreen from '../screens/PostScreen';
+import GameScreen from '../screens/Game';
+import ForumScreen from '../screens/ForumScreen';
+import PostScreen from '../screens/PostScreen';
 import TopicScreen from '../screens/TopicScreen';
-import NewsScreen from '../screens/NewsScreen'
+import NewsScreen from '../screens/NewsScreen';
+import GameDetail from '../screens/GameDetail';
+import PlateScreen from '../screens/PlateScreen'
 
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
@@ -19,39 +22,36 @@ HomeStack.navigationOptions = {
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? 'ios-home'
-          : 'md-home'
-      }
+      name='home'
     />
   ),
 };
 
-const LinksStack = createStackNavigator({
-  Links: LinksScreen,
+const GameStack = createStackNavigator({
+  Game: GameScreen,
 });
 
-LinksStack.navigationOptions = {
+GameStack.navigationOptions = {
   tabBarLabel: '比赛',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-trophy' : 'md-trophy'}
+      name='game'
     />
   ),
 };
 
-const SettingsStack = createStackNavigator({
-  Settings: SettingsScreen
+const ForumStack = createStackNavigator({
+  Forum: ForumScreen
 });
 
-SettingsStack.navigationOptions = {
+ForumStack.navigationOptions = {
   tabBarLabel: '论坛',
-  tabBarIcon: ({ focused, tintColor  }) => (
+  tabBarIcon: ({ focused }) => (
+    
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu'}
+      name='forum'
     />
   ),
 };
@@ -59,8 +59,8 @@ SettingsStack.navigationOptions = {
 const TabNav = createBottomTabNavigator(
   {
   HomeStack,
-  LinksStack,
-  SettingsStack,
+  GameStack,
+  ForumStack,
   },
   {
     tabBarOptions: {
@@ -70,23 +70,43 @@ const TabNav = createBottomTabNavigator(
   }
   );
 
-const StacksOverTabs = createStackNavigator({
-  Root: {
-    screen: TabNav,
-    navigationOptions: {
-      header: null
+const StacksOverTabs = createStackNavigator(
+  {
+    Root: {
+      screen: TabNav,
+      navigationOptions: {
+        header: null
+      }
+    },
+    Details: {
+      screen: PostScreen
+    },
+    Topic: {
+      screen: TopicScreen
+    },
+    News: {
+      screen: NewsScreen
+    },
+    GameDetail: {
+      screen: GameDetail
+    },
+    Plate: {
+      screen: PlateScreen
     }
-  },
-  Details: {
-    screen: PostScreen
-  },
-  Topic: {
-    screen: TopicScreen
-  },
-  News: {
-    screen: NewsScreen
+  }, {
+    mode: 'card',
+    defaultNavigationOptions: {
+      gesturesEnabled: true,
+      gestureResponseDistance:150
+    },
+    transitionConfig: () => ({
+      screenInterpolator: CardStackStyleInterpolator.forHorizontal,
+      transitionSpec: {
+        duration: 250,
+      },
+    })
   }
-});
+);
 
 export default StacksOverTabs;
 

@@ -1,12 +1,12 @@
 import React from 'react';
 import  MD5  from "react-native-md5";
-import { View, FlatList ,ActivityIndicator, Text, Image, TouchableOpacity, Dimensions, ImageBackground, ScrollView} from 'react-native';
+import { View, FlatList ,ActivityIndicator, Text, Image, TouchableOpacity, Dimensions, ImageBackground, ScrollView, StatusBar} from 'react-native';
 
 export default class TopicScreen extends React.Component {
     static navigationOptions = {
         headerTransparent: true,
         headerTintColor: '#fff'
-      };
+    };
     constructor(props){
         super(props);
         this.state = {isLoading: true, nid: 0, count: 0};
@@ -43,12 +43,12 @@ export default class TopicScreen extends React.Component {
             <View>
             <View style={{backgroundColor: 'black', height: StatusBar.currentHeight}}></View>
             <ScrollView style={{marginBottom: 30}}>
-                <ImageBackground source={{uri: this.state.dataSource.img_m}} style={{width:Dimensions.get("window").width,  height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center'}}>
+                <ImageBackground source={{uri: this.state.dataSource.img_m}} imageStyle={{opacity:1}} style={{width:Dimensions.get("window").width,  height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center'}}>
                     <Text style={{color: '#fff', fontWeight: '500', fontSize: 18, marginLeft: 30,marginRight:30, lineHeight:30}}>{this.state.dataSource.title}</Text>
                 </ImageBackground>
                 <FlatList
                     data={this.state.dataSource.groups}
-                    keyExtractor={item => item.orderby}
+                    keyExtractor={(item, index) => 'key'+index}
                     style={{marginRight: 15, marginLeft: 15}}
                     showsVerticalScrollIndicator = {false}
                     renderItem={({item}) =>
@@ -60,7 +60,7 @@ export default class TopicScreen extends React.Component {
                         </View>
                         <FlatList 
                             data={item.news}
-                            keyExtractor={item => item.nid}
+                            keyExtractor={(item, index) => 'key'+index}
                             renderItem={({item}) =>
                             <TouchableOpacity style={{flexDirection:'row', paddingTop:10, paddingBottom:10, marginBottom:4}} onPress={() =>  {item.type==1?navigation.navigate('News', { nid: item.nid, replies: item.replies}): navigation.navigate('Details', { name:'湿乎乎的话题',fid: 1048, tid: item.link.slice(19,27)})}}>
                                 <Image source={{uri:item.img||item.thumbs[0]}} style={{width:90, height:70}}/>

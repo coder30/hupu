@@ -3,7 +3,7 @@ import { Font } from 'expo';
 import  MD5  from 'react-native-md5';
 import { logo, name } from '../constants/Team';
 import LogoTitle from '../components/LogoTitle';
-import {Text, View, FlatList, Image, TouchableOpacity, ImageBackground, StyleSheet,ActivityIndicator,RefreshControl ,Dimensions, ScrollView} from 'react-native';
+import {Text, View, FlatList, Image, TouchableOpacity, ImageBackground, StyleSheet,ActivityIndicator,RefreshControl ,Dimensions, ScrollView, TouchableWithoutFeedback} from 'react-native';
 
 
 export default class HomeScreen extends React.Component {
@@ -16,7 +16,7 @@ export default class HomeScreen extends React.Component {
 
   constructor(props){
     super(props);
-    this.state = {isLoading: true, nid: 0, count: 0, flag: true};
+    this.state = {isLoading: true, nid: 0, count: 0, flag: true, color: []};
   }
   getData() {
     var time = new Date().getTime()
@@ -26,6 +26,7 @@ export default class HomeScreen extends React.Component {
     return fetch(url)
       .then((Response)=>Response.json())
       .then((ResponseJson)=>{
+        console.log(url);
         var topic = []
         for(var i=0; i<ResponseJson.result.data.length; i++){
           if(ResponseJson.result.data[i].badge){
@@ -36,10 +37,17 @@ export default class HomeScreen extends React.Component {
             break;
         }
         var news = ResponseJson.result.data.slice(i);
+        var temp=[]
+        for(var i=0; i<news.length; i++){
+          if(news[i].title.indexOf('[广告]')!=-1||news[i].title.indexOf('[场下]')!=-1)
+            news.splice(i,1);
+          else
+            temp.push('black');
+        }
         if(ResponseJson.result.game.game_lists.length%2){
           ResponseJson.result.game.game_lists.pop();
         }
-        var num = this.state+ news.length
+        var num = this.state+ news.length;
         this.setState({
           isLoading: false,
           topSource :topic,
@@ -135,7 +143,7 @@ export default class HomeScreen extends React.Component {
         <FlatList
           data={this.state.topSource}
           style={{margin:12, marginRight: 0}}
-          keyExtractor={item => item.title} 
+          keyExtractor={(item, index) => 'key'+index}
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           renderItem={({item}) =>
@@ -150,24 +158,43 @@ export default class HomeScreen extends React.Component {
                   <View style={{padding:10, backgroundColor:'rgba(0, 0, 0, 0.54)'}}>
                     <Text style={{color:'#FFFFFF'}}>{item.title}</Text>
                     <View style={{flexDirection:'row', alignContent: 'center', marginTop: 10, color:'rgba(0, 0, 0, 0.38)'}}>
-                      <Image source={require('../assets/images/comment.png')} style={{width: 9, height: 10, marginRight:3, tintColor :'#FFFFFF'}}/>
-                      <Text style={{marginRight: 10, color:'#FFFFFF', fontSize: 10 ,height:10, lineHeight:10}}>{item.replies}</Text>
-                      <Image source={require('../assets/images/light.png')} style={{width: 8, height: 10, marginRight:3, tintColor :'#FFFFFF'}}/>
-                      <Text style={{marginRight: 10, color:'#FFFFFF', fontSize: 10,height:10, lineHeight:10}}>{item.lights}</Text>
+                      <Image source={require('../assets/images/comment.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'#FFFFFF'}}/>
+                      <Text style={{marginRight: 10, color:'#FFFFFF', fontSize: 10 ,lineHeight:18}}>{item.replies}</Text>
+                      {item.lights!="0"?
+                      <View style={{flexDirection:'row'}}>
+                        <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'#FFFFFF'}}/>
+                        <Text style={{marginRight: 10, color:'#FFFFFF', fontSize: 10, lineHeight:18}}>{item.lights}</Text>
+                      </View>
+                      :null
+                      }
+                      
                     </View>
                   </View>
                 </ImageBackground>
               </TouchableOpacity>
             </View>
           }/>
+          {this.state.gameSource.length?
+          <View>
           <Image source={require('../assets/images/gameLabel.png')}  style={{width: 72, height: 24, marginLeft:16}}/>
           <FlatList 
             data={this.state.gameSource}
-            keyExtractor={item => item.gid} 
+            keyExtractor={(item, index) => 'key'+index}
             style={{margin:9}}
             numColumns={2}
             renderItem={({item}) =>
+            <TouchableWithoutFeedback onPress={()=>{
+              if(item.process=="已结束")
+                navigation.navigate('GameDetail', {
+                  home_id: item.home_tid, 
+                  away_id: item.away_tid,
+                  home_score: item.home_score,
+                  away_score: item.away_score,
+                  gid: item.gid
+                })}
+            }>
             <View style={styles.gameCard}>
+            
               <View style={{flexDirection: 'column', marginLeft:-5}}>
                 <Image source={logo[item.home_tid]} style={{width:50, height:50}}/>
                 <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35, textAlign:'center', marginTop:-5, marginBottom:8}}>{name[item.home_tid]}</Text>
@@ -198,22 +225,38 @@ export default class HomeScreen extends React.Component {
                 <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35, textAlign:'center', marginTop:-5, marginBottom:8}}>{name[item.away_tid]}</Text>
               </View>
             </View>
+            </TouchableWithoutFeedback>
           }/>
+          </View>
+          :null
+          }
           <View style={{marginLeft:16, marginRight: 10}}>
             <Image source={require('../assets/images/news.png')}  style={{width: 72, height: 24, marginBottom:7}}/>
             <FlatList 
               data={this.state.newSource}
-              keyExtractor={item => item.nid}
-              renderItem={({item}) =>
-              <TouchableOpacity style={{flexDirection:'row', paddingTop:10, paddingBottom:10, marginBottom:4}} onPress={() =>  {item.type==1?navigation.navigate('News', { nid: item.nid, replies: item.replies}): navigation.navigate('Details', { name:'湿乎乎的话题',fid: 1048, tid: item.link.slice(19,27)})}}>
+              extraData={this.state}
+              keyExtractor={(item, index) => 'key'+index}
+              renderItem={({item, index}) =>
+              <TouchableOpacity style={{flexDirection:'row', paddingTop:10, paddingBottom:10, marginBottom:4}} onPress={() =>  {
+                var temp = this.state.color;
+                temp[index] = 'rgba(0, 0, 0, 0.38)';
+                this.setState({color: temp});
+                item.type==1?navigation.navigate('News', { nid: item.nid, replies: item.replies}): navigation.navigate('Details', { name:'湿乎乎的话题',fid: 1048, tid: item.link.slice(19,27)})}
+                }>
                 <Image source={{uri:item.img||item.thumbs[0]}} style={{width:90, height:70}}/>
                 <View style={{flexDirection:"column", justifyContent: "space-between", flex:1}}>
-                  <Text style={{marginLeft:10}}>{item.title}</Text>
+                  <Text style={{marginLeft:10, color: this.state.color[index]}}>{item.title}</Text>
                   <View style={{flexDirection:"row", marginLeft:10}}>
-                    <Image source={require('../assets/images/comment.png')} style={{width: 11, height:14, opacity:0.38, marginRight: 7}}/>
-                    <Text style={{marginRight: 10, color:'rgba(0, 0, 0, 0.38)', fontSize: 14,height:14, lineHeight:14}}>{item.replies}</Text>
-                    <Image source={require('../assets/images/light.png')} style={{width: 11, height:14, opacity:0.38, marginRight: 7}}/>
-                    <Text style={{marginRight: 10, color:'rgba(0, 0, 0, 0.38)', fontSize: 14,height:14, lineHeight:14}}>{item.lights}</Text>
+                    <Image source={require('../assets/images/comment.png')} style={{width: 18, height:18, opacity:0.38, marginRight: 3}}/>
+                    <Text style={{marginRight: 5, color:'rgba(0, 0, 0, 0.38)', fontSize: 10, lineHeight:18}}>{item.replies}</Text>
+                    {item.lights!="0"?
+                    <View style={{flexDirection: 'row'}}>
+                      <Image source={require('../assets/images/light.png')} style={{width: 18, height:18, opacity:0.38, marginRight: 3}}/>
+                      <Text style={{marginRight: 10, color:'rgba(0, 0, 0, 0.38)', fontSize: 10, lineHeight:18}}>{item.lights}</Text>
+                    </View>
+                    :null
+                    }
+                    
                   </View>
                 </View>
               </TouchableOpacity>
