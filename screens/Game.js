@@ -22,30 +22,31 @@ export default class LinksScreen extends React.Component {
   }
 
   render() {
-    const { navigation } = this.props;
     return (
       <View style={styles.container}>
-        <FlatList
-          data={tab}
-          horizontal={true}
-          extraData={this.state}
-          keyExtractor={(item, index) => 'key'+index}
-          showsHorizontalScrollIndicator = {false}
-          renderItem={({item}) =>
-          <View style={{margin: 16}}>
-            {this.state.tab == item.index?
-            <ImageBackground source={require('../assets/images/Rectangle.png')} style={{width:57, height: 22 , alignItems: 'center'}}>
-              <Text style={{color:'#FFFFFF', textAlign: 'center', lineHeight: 22}}>{item.name}</Text>
-            </ImageBackground>
-            :<TouchableWithoutFeedback onPress={() => {
-                this.setState({ tab:item.index });
-              }}>
-              <Text style={{lineHeight: 22, color:"rgba(0, 0, 0, 0.54)"}}>{item.name}</Text>
-             </TouchableWithoutFeedback>
+        <View>
+          <FlatList
+            data={tab}
+            horizontal={true}
+            extraData={this.state}
+            keyExtractor={(item, index) => 'key'+index}
+            showsHorizontalScrollIndicator = {false}
+            renderItem={({item}) =>
+            <View style={{margin: 16}}>
+              {this.state.tab == item.index?
+              <ImageBackground source={require('../assets/images/Rectangle.png')} style={{width:57, height: 22 , alignItems: 'center'}}>
+                <Text style={{color:'#FFFFFF', textAlign: 'center', lineHeight: 22}}>{item.name}</Text>
+              </ImageBackground>
+              :<TouchableWithoutFeedback onPress={() => {
+                  this.setState({ tab:item.index });
+                }}>
+                <Text style={{lineHeight: 22, color:"rgba(0, 0, 0, 0.54)"}}>{item.name}</Text>
+              </TouchableWithoutFeedback>
+              }
+            </View>
             }
-          </View>
-          }
-        />
+          />
+        </View>
         {this.state.tab=='1'?<Game navigate={this.props.navigation.navigate}/>:null}
         {this.state.tab=='2'?<Team/>:null}
         {this.state.tab=='3'?<Player type='regular'/>:null}

@@ -2,7 +2,8 @@ import React from 'react';
 import MD5  from"react-native-md5";
 import HTML from 'react-native-render-html';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import ScaledImage from '../components/ScaledImage'
+import ScaledImage from '../components/ScaledImage';
+import Rectangle from '../components/Rectangle';
 import {ScrollView, Modal, View, FlatList ,ActivityIndicator, Text, StyleSheet, Image, TouchableWithoutFeedback, Dimensions, ImageBackground, StatusBar, Linking } from 'react-native';
 
 const images = []
@@ -128,12 +129,7 @@ export default class NewsScreen extends React.Component {
                 </View>
                 {this.state.replySource.count=="0" || this.state.replySource.light_comments.length==0?null:
                 <View>
-                    <ImageBackground source={require('../assets/images/timeCard.png')} style={{width:128, height: 22 ,margin: 16}}>
-                        <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                            <Image source={require('../assets/images/light.png')} style={{width: 11, height: 14, marginRight:3, tintColor :'#FFFFFF'}}/>
-                            <Text style={{color:'#FFFFFF', textAlign: 'center'}}>这些评论亮了</Text>
-                        </View>
-                    </ImageBackground>
+                    <Rectangle type="light"/>  
                     <FlatList
                         data={this.state.replySource.light_comments}
                         keyExtractor={(item, index) => 'key'+index}
@@ -148,7 +144,7 @@ export default class NewsScreen extends React.Component {
                                     </View>
                                     <View style={{flexDirection:'row', alignItems:'center'}}>
                                         <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5, fontSize: 11}}>{item.light_count}</Text>
-                                        <Image source={require('../assets/images/light.png')} style={{width: 9, height: 11.5, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
+                                        <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
                                     </View>
                                 </View>
                                 {item.quote_data?
@@ -167,9 +163,7 @@ export default class NewsScreen extends React.Component {
                 }
                 {this.state.replySource.count==0?<Text>没有评论</Text>:
                 <View style={{marginBottom: 30}}>
-                    <ImageBackground source={require('../assets/images/Rectangle.png')} style={{width:80, height: 22 ,margin: 16, alignItems: 'center'}}>
-                        <Text style={{color:'#FFFFFF', textAlign: 'center'}}>最新评论</Text>
-                    </ImageBackground>
+                    <Rectangle type="reply"/>
                     <FlatList
                         data={this.state.replySource.data}
                         keyExtractor={(item, index) => 'key'+index}
@@ -184,7 +178,7 @@ export default class NewsScreen extends React.Component {
                                     </View>
                                     <View style={{flexDirection:'row', alignItems:'center'}}>
                                         <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5, fontSize: 11}}>{item.light_count}</Text>
-                                        <Image source={require('../assets/images/light.png')} style={{width: 9, height: 11.5, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
+                                        <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
                                     </View>
                                 </View>
                                 {item.quote_data?

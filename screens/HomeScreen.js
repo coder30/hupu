@@ -64,28 +64,11 @@ export default class HomeScreen extends React.Component {
     });
     this.getData()
   }
-
-  onEndReached = () => { 
-    var time = new Date().getTime();
-    var res = "channel=hupucom&client=861608045774351&crt="+time+"&direc=next&entrance=-1&nid="+this.state.nid+"&night=0&pre_count=21&time_zone=Asia/ShanghaiHUPU_SALT_AKJfoiwer394Jeiow4u309"
-    var sign = MD5.hex_md5(res);
-    var url = "https://games.mobileapi.hupu.com/1/7.1.1/nba/getNews?crt="+time+"&night=0&channel=hupucom&nid="+this.state.nid+"&sign="+sign+"&client=861608045774351&direc=next&time_zone=Asia%2FShanghai&entrance=-1&pre_count=21"
-    return fetch(url)
-      .then((Response)=>Response.json())
-      .then((ResponseJson)=>{
-        console.log(url);
-        var result = this.state.newSource.concat(ResponseJson.result.data)
-        this.setState({
-          newSource: result,
-          nid: ResponseJson.result.data[ResponseJson.result.data.length-1].nid
-        })
-      })
-  }
-
   _onRefresh() {
     this.setState({
-      isRefreshing: true
-    })
+      isRefreshing: true,
+      color: []
+    });
     this.getData();
     this.setState({
       isRefreshing: false
@@ -108,11 +91,19 @@ export default class HomeScreen extends React.Component {
           .then((Response)=>Response.json())
           .then((ResponseJson)=>{
             console.log(url);
+            var temp = this.state.color;
+            for(var i=0; i<ResponseJson.result.data.length; i++){
+              if(ResponseJson.result.data[i].title.indexOf('[广告]')!=-1||ResponseJson.result.data[i].title.indexOf('[场下]')!=-1)
+                ResponseJson.result.data.splice(i,1);
+              else
+                temp.push('black')
+            }
             var result = this.state.newSource.concat(ResponseJson.result.data)
             this.setState({
               newSource: result,
               nid: ResponseJson.result.data[ResponseJson.result.data.length-1].nid,
-              flag: true
+              flag: true,
+              color: temp
             })
           })
       }

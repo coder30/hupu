@@ -44,7 +44,7 @@ export default class Injury extends React.Component {
       )
     }
     return (
-      <ScrollView horizontal={true} style={{flexDirection:'row'}}>
+      <View style={{flexDirection:'row'}}>
         <FlatList
         style={styles.leftTab}
         data={this.state.dataSource}
@@ -79,31 +79,37 @@ export default class Injury extends React.Component {
         showsVerticalScrollIndicator = {false}
         renderItem={({item, index}) =>
             <View>
-                <View style={{flexDirection: 'row', backgroundColor: 'rgba(0, 0, 0, 0.12)', padding: 7}}>
-                    <Text style={{minWidth: 170, fontSize: 12}}>{item.name}</Text>
-                    <Text style={{paddingRight: 35, fontSize: 12}}>伤停</Text>
-                    <Text style={{paddingRight: 17, fontSize: 12}}>最新进展</Text>
+                <View style={{flexDirection: 'row', backgroundColor: 'rgba(0, 0, 0, 0.12)', justifyContent:'space-between', padding: 7}}>
+                    <Text style={{fontSize: 12}}>{item.name}</Text>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={{ fontSize: 12,marginRight:10}}>伤停</Text>
+                      <Text style={{ fontSize: 12}}>最新进展</Text>
+                    </View>
                 </View>
                 <FlatList
                 data={item.data}
                 showsVerticalScrollIndicator = {false}
                 keyExtractor={(item, index) => 'key'+index}
                 renderItem={({item,index}) =>
-                  <View style={{flexDirection: 'row', padding:5, backgroundColor: color[index%2]}}>
-                    <Image source={{uri: item.player_photo}} style={{width: 28, height: 40, marginRight:3}}/>
-                    <View style={{minWidth: 140}}>
-                        <Text style={{}}>{item.player_name}</Text>
-                        <Text style={{fontSize: 12, lineHeight:15, color:"rgba(0, 0, 0, 0.54)"}}>{item.team_name}</Text>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between', padding:5, backgroundColor: color[index%2]}}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Image source={{uri: item.player_photo}} style={{width: 28, height: 40, marginRight:3}}/>
+                      <View>
+                          <Text style={{}}>{item.player_name}</Text>
+                          <Text style={{fontSize: 12, lineHeight:15, color:"rgba(0, 0, 0, 0.54)"}}>{item.team_name}</Text>
+                      </View>
                     </View>
-                    <Text style={{lineHeight:30, paddingRight: 10, minWidth: 60}}>{item.injury_part_cn}</Text>
-                    <Text style={{lineHeight:30, paddingRight: 5}}>{item.injury_returns_cn}</Text>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={{lineHeight:30, paddingRight: 10, fontSize:12}}>{item.injury_part_cn}</Text>
+                      <Text style={{lineHeight:30,fontSize:12}}>{item.injury_returns_cn}</Text>
+                    </View>
                   </View>
                 }
                 />
             </View>
         }
         />
-      </ScrollView>
+      </View>
     );
   }
 }
