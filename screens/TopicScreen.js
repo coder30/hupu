@@ -28,6 +28,7 @@ export default class TopicScreen extends React.Component {
           })
     }
     componentDidMount() {
+        StatusBar.setBarStyle('light-content');
         this.getData()
     }
     render() {

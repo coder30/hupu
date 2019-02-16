@@ -12,14 +12,14 @@ export default class SettingsScreen extends React.Component {
   };
   constructor(props){
     super(props);
-    this.state = {isLoading: true, stamp: 0, lastTid: 0, flag: true, color: [], tab:0, plate: 0};
+    this.state = {isLoading: true, stamp: 0, lastTid: 0, flag: true, color: [], tab:0, plate: 0, addition_tid:-1};
     this.onEndReachedCalledDuringMomentum = true; 
   }
   getData() {
-    var time = new Date().getTime()
-    var res = "client=316810195181635&crt=" + time + "&isHome=1&lastTid="+this.state.lastTid+"&night=0&stamp="+this.state.stamp+"&time_zone=Asia/ShanghaiHUPU_SALT_AKJfoiwer394Jeiow4u309"
+    var time = new Date().getTime();
+    var res = "_ssid=PHVua25vd24gc3NpZD4=&additionTid="+this.state.additionTid+"&android_id=c515b866695fe8c3&client=861608045774351&clientId=40834464&crt="+time+"&isHome=1&lastTid="+this.state.lastTid+"&nav=buffer,nba,video,follow,cba,lrw,fitness,stylish,gear,digital&night=0&stamp="+this.state.stamp+"&time_zone=Asia/Shanghai&unfollowTid=HUPU_SALT_AKJfoiwer394Jeiow4u309"
     var sign = MD5.hex_md5(res);
-    var url = 'https://bbs.mobileapi.hupu.com/1/7.1.1/recommend/getThreadsList?crt=' + time +'&night=0&lastTid='+this.state.lastTid+'&sign='+ sign +'&client=316810195181635&stamp='+this.state.stamp+'&isHome=1&time_zone=Asia/Shanghai'
+    var url = "https://bbs.mobileapi.hupu.com/1/7.3.2/recommend/getThreadsList?nav=buffer,nba,video,follow,cba,lrw,fitness,stylish,gear,digital&clientId=40834464&crt="+time+"&night=0&lastTid="+this.state.lastTid+"&sign="+sign+"&stamp="+this.state.stamp+"&_ssid=PHVua25vd24gc3NpZD4=&isHome=1&time_zone=Asia/Shanghai&additionTid="+this.state.additionTid+"&client=861608045774351&android_id=c515b866695fe8c3&unfollowTid="
     this.getForum();
     return fetch(url)
       .then((Response)=>Response.json())
@@ -27,17 +27,20 @@ export default class SettingsScreen extends React.Component {
         var temp = [];
         console.log(url);
         for(var i=0; i<ResponseJson.result.data.length; i++){
-          ResponseJson.result.data[i].forum_logo.replace("\\", "")
-          temp.push('black')
           if(ResponseJson.result.data[i].badge && ResponseJson.result.data[i].badge[0].name=='广告'){
             ResponseJson.result.data.splice(i, 1);
+          }
+          else {
+            ResponseJson.result.data[i].forum_logo.replace("\\", "")
+            temp.push('black')
           }
         }
         this.setState({
           dataSource :ResponseJson.result.data,
-          stamp: time,
+          stamp: ResponseJson.result.stamp,
           lastTid: ResponseJson.result.data[ResponseJson.result.data.length-1].tid,
-          color: temp
+          color: temp,
+          additionTid: ResponseJson.result.addition_tid
         })
       })
   }
@@ -63,23 +66,28 @@ export default class SettingsScreen extends React.Component {
       this.setState({
         flag: false
       })
-      var time = new Date().getTime()
-      var res = "client=316810195181635&crt=" + time + "&isHome=0&lastTid="+this.state.lastTid+"&night=0&stamp="+this.state.stamp+"&time_zone=Asia/ShanghaiHUPU_SALT_AKJfoiwer394Jeiow4u309"
+      var time = new Date().getTime();
+      var res = "_ssid=PHVua25vd24gc3NpZD4=&additionTid=&android_id=c515b866695fe8c3&client=861608045774351&clientId=40834464&crt="+time+"&isHome=0&lastTid="+this.state.lastTid+"&nav=buffer,nba,video,follow,cba,lrw,fitness,stylish,gear,digital&night=0&stamp="+this.state.stamp+"&time_zone=Asia/Shanghai&unfollowTid=HUPU_SALT_AKJfoiwer394Jeiow4u309"
       var sign = MD5.hex_md5(res);
-      var url = 'https://bbs.mobileapi.hupu.com/1/7.1.1/recommend/getThreadsList?crt=' + time +'&night=0&lastTid='+this.state.lastTid+'&sign='+ sign +'&client=316810195181635&stamp='+this.state.stamp+'&isHome=0&time_zone=Asia/Shanghai'
+      var url = "https://bbs.mobileapi.hupu.com/1/7.3.2/recommend/getThreadsList?nav=buffer,nba,video,follow,cba,lrw,fitness,stylish,gear,digital&clientId=40834464&crt="+time+"&night=0&lastTid="+this.state.lastTid+"&sign="+sign+"&stamp="+this.state.stamp+"&_ssid=PHVua25vd24gc3NpZD4=&isHome=0&time_zone=Asia/Shanghai&additionTid=&client=861608045774351&android_id=c515b866695fe8c3&unfollowTid="
       return fetch(url)
         .then((Response)=>Response.json())
         .then((ResponseJson) => {
+          console.log(url);
           var temp = this.state.color;
           for(var i=0; i<ResponseJson.result.data.length; i++){
-            ResponseJson.result.data[i].forum_logo.replace("\\", "")
-            temp.push('black')
+            if(ResponseJson.result.data[i].badge && ResponseJson.result.data[i].badge[0].name=='广告'){
+              ResponseJson.result.data.splice(i, 1);
+            }
+            else {
+              ResponseJson.result.data[i].forum_logo.replace("\\", "")
+              temp.push('black')
+            }
           }
           var result = this.state.dataSource.concat(ResponseJson.result.data)
           this.setState({
-            
             dataSource :result,
-            stamp: time,
+            stamp: ResponseJson.result.stamp,
             lastTid: ResponseJson.result.data[i-1].tid,
             flag: true,
             color: temp
@@ -88,7 +96,11 @@ export default class SettingsScreen extends React.Component {
     }
 } 
   refreshmore() {
-    this.getData()
+    this.setState({
+      lastTid: 0
+    },()=>{
+      this.getData()
+    });
   }
   
   render() {

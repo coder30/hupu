@@ -46,6 +46,10 @@ export default class Game extends React.Component {
             console.log(error);
           })
       }
+    onLayout() {
+      this.list.scrollToIndex({index: this.state.index})
+    }
+    
     render() {
         if(this.state.isLoading){
             return(
@@ -55,9 +59,12 @@ export default class Game extends React.Component {
             )
         }
         return (
+          <View onLayout={() => this.onLayout()}>
             <FlatList
+                style= {{marginBottom: 50}}
                 keyExtractor={(item, index) => 'key'+index}
-                initialScrollIndex={this.state.index}
+                ref={el => this.list = el}
+                extraData={this.state}
                 data={this.state.dataSource} 
                 showsVerticalScrollIndicator = {false}
                 renderItem={({item}) =>
@@ -80,8 +87,8 @@ export default class Game extends React.Component {
                                 })}
                             }>
                               <View style={styles.gameCard}>
-                                  <Image source={logo[item.home.id]} style={{width: 54, height: 54, marginRight:3, marginLeft: -20}}/>
-                                  <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35}}>{name[item.home.id]}</Text>
+                                  <Image source={logo[item.home.id] || {uri: item.home.logo}} style={{width: 54, height: 54, marginRight:3, marginLeft: -20}}/>
+                                  <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35}}>{name[item.home.id]||item.home.name}</Text>
                                   <View style={{flexDirection: 'row', alignItems: 'center', flex:2, justifyContent: 'space-between', maxWidth: 200, minWidth: 150}}>
                                   {item.home_score!=''?
                                   <Text style={{padding:5, fontFamily: 'DINCond-Bold', fontSize: 24, color: item.home_color, minWidth:40, marginLeft: -10}}>{item.home_score}</Text>
@@ -117,8 +124,8 @@ export default class Game extends React.Component {
                                   :<View style={{marginLeft: 16}}></View>
                                   }
                                   </View>
-                                  <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35}}>{name[item.away.id]}</Text>
-                                  <Image source={logo[item.away.id]} style={{width: 54, height: 54, marginRight:3 ,marginRight: -20}}/> 
+                                  <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35}}>{name[item.away.id]||item.away.name}</Text>
+                                  <Image source={logo[item.away.id]  || {uri: item.away.logo}} style={{width: 54, height: 54, marginRight:3 ,marginRight: -20}}/> 
                               </View>
                             </TouchableWithoutFeedback>
                             }
@@ -126,6 +133,7 @@ export default class Game extends React.Component {
                     }/>
                 </View>
             }/>
+            </View>
         );
     }
 }
@@ -146,7 +154,7 @@ const styles = StyleSheet.create({
       paddingRight: 16,
       paddingTop: 8,
       margin: 10,
-      justifyContent: 'space-between',
+      justifyContent: 'space-around',
       alignItems: 'center'
     },
     live: {

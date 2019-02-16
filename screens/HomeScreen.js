@@ -39,12 +39,14 @@ export default class HomeScreen extends React.Component {
         var news = ResponseJson.result.data.slice(i);
         var temp=[]
         for(var i=0; i<news.length; i++){
-          if(news[i].title.indexOf('[广告]')!=-1||news[i].title.indexOf('[场下]')!=-1)
+          if(news[i].title.indexOf('[广告]')!=-1||news[i].title.indexOf('[场下]')!=-1||news[i].title.indexOf('[场上]')!=-1)
+            news.splice(i,1);
+          else if(news[i].badge && news[i].badge[0].name=='广告')
             news.splice(i,1);
           else
             temp.push('black');
         }
-        if(ResponseJson.result.game.game_lists.length%2){
+        if(ResponseJson.result.game.game_lists.length%2 && ResponseJson.result.game.game_lists.length!=1){
           ResponseJson.result.game.game_lists.pop();
         }
         var num = this.state+ news.length;
@@ -93,7 +95,9 @@ export default class HomeScreen extends React.Component {
             console.log(url);
             var temp = this.state.color;
             for(var i=0; i<ResponseJson.result.data.length; i++){
-              if(ResponseJson.result.data[i].title.indexOf('[广告]')!=-1||ResponseJson.result.data[i].title.indexOf('[场下]')!=-1)
+              if(ResponseJson.result.data[i].title.indexOf('[广告]')!=-1||ResponseJson.result.data[i].title.indexOf('[场下]')!=-1||ResponseJson.result.data[i].title.indexOf('[场上]')!=-1)
+                ResponseJson.result.data.splice(i,1);
+              else if(ResponseJson.result.data[i].badge && ResponseJson.result.data[i].badge[0].name=='广告')
                 ResponseJson.result.data.splice(i,1);
               else
                 temp.push('black')
@@ -139,7 +143,17 @@ export default class HomeScreen extends React.Component {
           showsHorizontalScrollIndicator={false}
           renderItem={({item}) =>
             <View>
-              <TouchableOpacity onPress={() =>  {item.badge.length==2?navigation.navigate('Topic', { nid: item.nid}): navigation.navigate('News', {  replies: item.replies, nid: item.nid})}}>
+              <TouchableOpacity onPress={() => {
+                if(item.badge.length==2){
+                  navigation.navigate('Topic', { nid: item.nid})
+                }
+                else if(item.type==1) {
+                  navigation.navigate('News', {  replies: item.replies, nid: item.nid})
+                }
+                else {
+                  navigation.navigate('Details', { name:'',fid: 1048, tid: item.link.slice(19,27)})
+                }
+              }}>
                 <ImageBackground  source={{uri: item.img}} style={{width: Dimensions.get("screen").width-40, height: (Dimensions.get("screen").width-40)*190/328, margin:4, justifyContent: 'space-between'}}>
                   {item.badge[1]?
                   <Image source={require('../assets/images/topic.png')} style={{width: 57, height: 22, margin:10}}/>
@@ -185,10 +199,9 @@ export default class HomeScreen extends React.Component {
                 })}
             }>
             <View style={styles.gameCard}>
-            
               <View style={{flexDirection: 'column', marginLeft:-5}}>
-                <Image source={logo[item.home_tid]} style={{width:50, height:50}}/>
-                <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35, textAlign:'center', marginTop:-5, marginBottom:8}}>{name[item.home_tid]}</Text>
+                <Image source={logo[item.home_tid] || {uri:item.home_logo}} style={{width:50, height:50}}/>
+                <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35, textAlign:'center', marginTop:-5, marginBottom:8}}>{name[item.home_tid] || item.home_name}</Text>
               </View>
               <View style={{margin:-20, flexDirection:"column", alignItems:"center"}}>
                 <View style={{flexDirection:'row'}}>
@@ -212,8 +225,8 @@ export default class HomeScreen extends React.Component {
                 }
               </View>
               <View style={{flexDirection: 'column'}}>
-                <Image source={logo[item.away_tid]} style={{width:50, height:50}}/>
-                <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35, textAlign:'center', marginTop:-5, marginBottom:8}}>{name[item.away_tid]}</Text>
+                <Image source={logo[item.away_tid] || {uri:item.away_logo}} style={{width:50, height:50}}/>
+                <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35, textAlign:'center', marginTop:-5, marginBottom:8}}>{name[item.away_tid]||item.away_name}</Text>
               </View>
             </View>
             </TouchableWithoutFeedback>
@@ -270,6 +283,6 @@ const styles = StyleSheet.create({
     margin: 7,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: 'space-around'
   }
 })

@@ -1,14 +1,17 @@
 import React from 'react';
 import { Video } from 'expo';
 import MD5  from"react-native-md5";
+import VideoPlayer from '@expo/videoplayer';
 import HTML from 'react-native-render-html';
 import Rectangle from '../components/Rectangle';
 import ScaledImage from '../components/ScaledImage';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import {View, Text, ActivityIndicator, FlatList, StyleSheet, ScrollView, Image, Dimensions ,ImageBackground, TouchableWithoutFeedback, Modal} from'react-native';
+
+import {View, Text,Linking, ActivityIndicator, FlatList, StyleSheet, ScrollView, Image, Dimensions ,ImageBackground,StatusBar, TouchableWithoutFeedback, Modal} from'react-native';
 
 var images = []
-var title = ''
+var flag = true;
+var page=2;
 export default class PostScreen extends React.Component {
     static navigationOptions = ({navigation}) =>({  
         headerStyle: {
@@ -28,10 +31,13 @@ export default class PostScreen extends React.Component {
     });  
     constructor(props){
         super(props);
-        this.state = {isLoading: true, modalVisible: false, index:0}
+        this.state = {isLoading: true, modalVisible: false, index:0,isPortrait: true}
     }
     async componentDidMount() {
-        images=[]
+        page=2;
+        flag = true;
+        images=[];
+        StatusBar.setBarStyle('dark-content');
         const { navigation } = this.props;
         const fid = navigation.getParam('fid');
         const tid = navigation.getParam('tid');
@@ -41,6 +47,8 @@ export default class PostScreen extends React.Component {
         var url = "https://bbs.mobileapi.hupu.com/1/7.1.1/threads/getThreadsSchemaInfo?fid="+fid+"&crt="+time+"&night=0&px=1080&sign="+sign+"&nopic=0&time_zone=Asia%2FShanghai&tid="+tid+"&ft=18&nps=3&client=316810195181635&entrance=1"
         var url_light = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadLightReplyList?offline=json&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&client=861608045774351&webp=1"
         var url_reply = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadPostList?offline=json&page=1&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&show_type=default&client=316810195181635&webp=1"
+        console.log(url_reply);
+        console.log(url_light);
         return fetch(url)
             .then((Response)=>Response.json())
             .then(async (ResponseJson) =>{
@@ -76,10 +84,7 @@ export default class PostScreen extends React.Component {
             img: (htmlAttribs)=>{
                 if(!htmlAttribs.data_url)
                     return <View key={Math.random()}></View>
-                // if(htmlAttribs['data-gif'])
-                //     htmlAttribs.src = htmlAttribs['data-src']||htmlAttribs.src;
-                // else 
-                    htmlAttribs.src = htmlAttribs.data_url;
+                htmlAttribs.src = htmlAttribs.data_url;
                 let h = 0;
                 if(htmlAttribs['data-h']==undefined){
                     let start = htmlAttribs.src.indexOf('w_')+2;
@@ -98,15 +103,7 @@ export default class PostScreen extends React.Component {
                 }
                 if(i == images.length)
                     images.push({url:htmlAttribs.src})
-                // if(htmlAttribs['data-gif']){
-                //     return (
-                //         <TouchableWithoutFeedback key={Math.random()} onPress={() =>{
-                //             this.refs.Image.setNativeProps({ source : {uri: htmlAttribs} });
-                //         }}>
-                //             <Image source={{uri: htmlAttribs.src}}  style={{width:width,height:h, marginBottom: 10}}/>             
-                //         </TouchableWithoutFeedback>
-                //     ) 
-                // }
+                //console.log(htmlAttribs.src);
                 if(!h){
                     return (
                         <TouchableWithoutFeedback key={Math.random()} onPress={() => this.setState({ modalVisible: true, index:i})}>
@@ -122,7 +119,30 @@ export default class PostScreen extends React.Component {
             }
         }
     }
-
+    async _contentViewScroll(e){
+        var offsetY = e.nativeEvent.contentOffset.y; //滑动距离
+        var contentSizeHeight = e.nativeEvent.contentSize.height; //scrollView contentSize高度
+        var oriageScrollHeight = e.nativeEvent.layoutMeasurement.height; //scrollView高度
+        if (offsetY + oriageScrollHeight >= contentSizeHeight-800){
+            if(flag){
+                flag = false;
+                const { navigation } = this.props;
+                const fid = navigation.getParam('fid');
+                const tid = navigation.getParam('tid');
+                var url_reply = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadPostList?offline=json&page="+page+"&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&show_type=default&client=316810195181635&webp=1"
+                var result = await fetch(url_reply)
+                var resultJson_reply = await result.json();
+                var list = this.state.replySource.list.concat(resultJson_reply.data.result.list);
+                this.state.replySource.list = list;
+                page++;
+                this.setState({
+                    replySource: this.state.replySource,
+                })
+                if(page<=resultJson_reply.data.result.all_page)
+                    flag = true;
+            }
+        }
+    }
     render() {
         var res;
         if(this.state.isLoading){
@@ -138,16 +158,17 @@ export default class PostScreen extends React.Component {
         return (
             <View>
                 {res.video_info.length==0?null:
-                    <Video 
-                        source={{uri: res.video_info.src}} 
-                        rate={1.0}
-                        volume={1.0}
-                        isMuted={false}
-                        resizeMode="contain"
-                        shouldPlay
-                        useNativeControls={true}
-                        shouldPlay={false}
-                        style={{ width: Dimensions.get("window").width, height: 200 }}
+                    <VideoPlayer
+                        videoProps={{
+                            shouldPlay: false,
+                            resizeMode: Video.RESIZE_MODE_CONTAIN,
+                            source: {
+                            uri: res.video_info.src,
+                            },
+                        }}
+                        isPortrait={true}
+                        playFromPositionMillis={0}
+                        showControlsOnLoad={true}
                     />
                 }
                 <Modal
@@ -169,7 +190,7 @@ export default class PostScreen extends React.Component {
                     enableSwipeDown={true}
                 />
                 </Modal>
-                <ScrollView showsVerticalScrollIndicator = {false}>
+                <ScrollView showsVerticalScrollIndicator = {false} onMomentumScrollEnd = {this._contentViewScroll.bind(this)}>
                     <View style={styles.header}>
                         <Text style={{fontSize:22,fontWeight:'500', marginBottom:5}}>{res.title}</Text>
                         <View style={{flexDirection:'row', marginBottom: 10, marginTop: 10}}>
@@ -179,7 +200,7 @@ export default class PostScreen extends React.Component {
                                 <Text style={{color:'#9A9898', fontSize:12, paddingRight:5}}>{res.time} 阅读 {res.visits}</Text>
                             </View>
                         </View>
-                        <HTML html={res.content || res.error.text} alterNode={this.alterNode} renderers={this.renderers(Dimensions.get("window").width-20)}/> 
+                        <HTML html={res.content || res.error.text} alterNode={this.alterNode} renderers={this.renderers(Dimensions.get("window").width-20)} onLinkPress={(evt, href)=>Linking.openURL(href)}/> 
                     </View>    
                     {res.error || !this.state.lightSource.list.length?null:
                         <View>
@@ -195,10 +216,16 @@ export default class PostScreen extends React.Component {
                                             <View style={{flexDirection:'row', alignItems:'center'}}>
                                                 <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5}}>{item.userName}</Text>
                                                 <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>{item.time}</Text>
+                                                {item.userName==res.username?
+                                                <View style={{backgroundColor: 'rgba(0, 0, 0, 0.12)', marginLeft: 10, borderRadius: 5, padding:2}}>
+                                                    <Text style={{fontSize: 10, color:'rgba(0, 0, 0, 0.5)'}}>楼主</Text>
+                                                </View>
+                                                :null
+                                                }
                                             </View>
                                             <View style={{flexDirection:'row', alignItems:'center'}}>
                                                 <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5, fontSize: 11}}>{item.light_count}</Text>
-                                                <Image source={require('../assets/images/light.png')} style={{width: 9, height: 11.5, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
+                                                <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
                                             </View>
                                         </View>
                                         {item.quote&&item.quote.length!=0?
@@ -207,11 +234,11 @@ export default class PostScreen extends React.Component {
                                             <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12}}>{item.quote[0].header[0].slice(item.quote[0].header[0].indexOf('>')+1, item.quote[0].header[0].indexOf('<', 6))}</Text>
                                             :null
                                             }
-                                            <HTML html={item.quote[0].content} style={{padding: 10}} alterNode={this.alterNode_quote} renderers={this.renderers(Dimensions.get("window").width-75)}/>
+                                            <HTML html={item.quote[0].content} style={{padding: 10}} alterNode={this.alterNode_quote} renderers={this.renderers(Dimensions.get("window").width-75)} onLinkPress={(evt, href)=>Linking.openURL(href)}/>
                                         </View>
                                         :null
                                         }
-                                        <HTML html={item.content} style={{padding: 10}}  alterNode={this.alterNode_reply} renderers={this.renderers(Dimensions.get("window").width-65)}/>
+                                        <HTML html={item.content} style={{padding: 10}}  alterNode={this.alterNode_reply} renderers={this.renderers(Dimensions.get("window").width-65)} onLinkPress={(evt, href)=>Linking.openURL(href)}/>
                                     </View>
                                 </View>
                                 }
@@ -224,6 +251,7 @@ export default class PostScreen extends React.Component {
                             <FlatList
                                 data={this.state.replySource.list}
                                 keyExtractor={(item, index) => 'key'+index}
+                                extraData={this.state}
                                 renderItem={({item}) =>
                                 <View style={styles.card}>
                                     <Image source={{uri: item.userImg}} style={{width: 30, height: 30, marginRight:5, borderRadius:50}}/>
@@ -232,10 +260,16 @@ export default class PostScreen extends React.Component {
                                             <View style={{flexDirection:'row', alignItems:'center'}}>
                                                 <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5}}>{item.userName}</Text>
                                                 <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>{item.time}</Text>
+                                                {item.userName==res.username?
+                                                <View style={{backgroundColor: 'rgba(0, 0, 0, 0.12)', marginLeft: 10, borderRadius: 5,padding:2}}>
+                                                    <Text style={{fontSize: 10, color:'rgba(0, 0, 0, 0.5)'}}>楼主</Text>
+                                                </View>
+                                                :null
+                                                }
                                             </View>
                                             <View style={{flexDirection:'row', alignItems:'center'}}>
                                                 <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5, fontSize: 11}}>{item.light_count}</Text>
-                                                <Image source={require('../assets/images/light.png')} style={{width: 9, height: 11.5, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
+                                                <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
                                             </View>
                                         </View>
                                         {item.quote&&item.quote.length!=0?
@@ -244,15 +278,20 @@ export default class PostScreen extends React.Component {
                                             <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12}}>{item.quote[0].header[0].slice(item.quote[0].header[0].indexOf('>')+1, item.quote[0].header[0].indexOf('<', 6))}</Text>
                                             :null
                                             }
-                                            <HTML html={item.quote[0].content} style={{padding: 10}} alterNode={this.alterNode_quote} renderers={this.renderers(Dimensions.get("window").width-75)}/>
+                                            <HTML html={item.quote[0].content} style={{padding: 10}} alterNode={this.alterNode_quote} renderers={this.renderers(Dimensions.get("window").width-75)} onLinkPress={(evt, href)=>Linking.openURL(href)}/>
                                         </View>
                                         :null
                                         }
-                                        <HTML html={item.content}  style={{padding: 10}} alterNode={this.alterNode_reply} renderers={this.renderers(Dimensions.get("window").width-65)}/>
+                                        <HTML html={item.content}  style={{padding: 10}} alterNode={this.alterNode_reply} renderers={this.renderers(Dimensions.get("window").width-65)} onLinkPress={(evt, href)=>Linking.openURL(href)}/>
                                     </View>
                                 </View>
                                 }
                             />
+                            {page>this.state.replySource.all_page?null:
+                            <View style={{flex: 1, padding: 20}}>
+                                <ActivityIndicator color ="#C01E2F"/>
+                            </View>
+                            }
                         </View>
                     }
                 </ScrollView>

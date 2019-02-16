@@ -14,7 +14,7 @@ export default class Rectangle extends React.Component {
     else if(this.props.type=='reply')
         return (
           <ImageBackground source={require('../assets/images/Rectangle.png')} style={{width:80, height: 22 ,margin: 16, alignItems: 'center'}}>
-            <Text style={{color:'#FFFFFF', textAlign: 'center'}}>最新评论</Text>
+            <Text style={{color:'#FFFFFF', textAlign: 'center', lineHeight:22}}>最新评论</Text>
           </ImageBackground>
         )
     }

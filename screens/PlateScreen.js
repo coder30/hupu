@@ -12,6 +12,7 @@ export default class Plate extends React.Component {
         this.state = {isLoading: true, page:1, dataSource:[], lastTid: '',color:[]}
     }
     async componentDidMount() {
+        StatusBar.setBarStyle('light-content');
         const { navigation } = this.props;
         var fid = navigation.getParam('fid');
         var time = new Date().getTime();

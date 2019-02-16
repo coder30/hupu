@@ -2,10 +2,12 @@ import React from 'react';
 import { Font } from 'expo';
 import  MD5  from 'react-native-md5';
 var DomParser = require('dom-parser');
-import {TriangleCorner} from '../components/Rec';
+import HTML from 'react-native-render-html';
 import { logo, chineseName, color, chineseShortName, teamVertical, teamVerticalChinese } from '../constants/Team';
-import { View, StyleSheet, Text, Image, ActivityIndicator,Dimensions,StatusBar,ImageBackground,ScrollView, FlatList, TouchableWithoutFeedback, Linking} from 'react-native';
-import {rectangle} from '../constants/Icon'
+import { WebView,Modal, View, StyleSheet, Text, Image, ActivityIndicator,Dimensions,StatusBar,ImageBackground,ScrollView, FlatList, TouchableWithoutFeedback, Linking} from 'react-native';
+var tabColor = ['#fff', '#C01E2F', '#fff'];
+const dataColor=['#F2F2F2', '#fff'];
+var gid = '';
 export default class GameDetailScreen extends React.Component {
     static navigationOptions = {
         headerTransparent: true,
@@ -13,14 +15,15 @@ export default class GameDetailScreen extends React.Component {
     };
     constructor(props){
         super(props);
-        this.state = {isLoading: true, tab1: 3, tab2: 0, position: 'absolute', tab3:0,tab4:1,tab5:1}
+        this.state = {isLoading: true, tab1: 3, tab2: 0, position: 'absolute', tab3:0,tab4:1,tab5:1,modalVisible:false}
     }
     componentDidMount(){
+        StatusBar.setBarStyle('light-content');
         const { navigation } = this.props;
         Font.loadAsync({
             'DINCond-Bold': require('../assets/fonts/DINCond-Bold.otf'),
         });
-        var gid = navigation.getParam('gid')
+        gid = navigation.getParam('gid')
         var url = 'https://games.mobileapi.hupu.com/1/7.1.1/nba/getRecap7?client=861608045774351&gid='+ gid +'&nopic=0&night=0&entrance=-1&night=0'
         fetch(url)
         .then((Response)=>{
@@ -72,6 +75,7 @@ export default class GameDetailScreen extends React.Component {
         fetch(url)
             .then((Response)=>Response.json())
             .then((ResponseJson)=>{
+                console.log(url);
                 this.setState({
                     dataDetail: ResponseJson.result
                 })
@@ -102,6 +106,18 @@ export default class GameDetailScreen extends React.Component {
         }
         return(
             <View>
+                <Modal
+                visible={this.state.modalVisible}
+                transparent={true}
+                onRequestClose={() => this.setState({ modalVisible: false })}
+                >
+                    <TouchableWithoutFeedback onPress={()=>{
+                        this.setState({ modalVisible: false })
+                    }}>
+                    <View style={{width: Dimensions.get('window').width, height:Dimensions.get('window').height/5}}></View>
+                    </TouchableWithoutFeedback>
+                    <WebView source={{uri:"https://games.mobileapi.hupu.com/1/7.3.2/nba/showPlayer?client=861608045774351&night=0&gid="+gid+"&player_id="+this.state.player_id}} style={{width: Dimensions.get('window').width, height:Dimensions.get('window').height}}/>
+                </Modal>
                 <View style={{backgroundColor: 'black', height: StatusBar.currentHeight}}></View>
                 <ScrollView>
                     <ImageBackground source={{uri: this.state.dataSource.img.imgUrl}} style={{position: this.state.position, width: this.state.dataSource.img.width, height: this.state.dataSource.img.height}}>
@@ -241,59 +257,134 @@ export default class GameDetailScreen extends React.Component {
                         }
                         />  
                     </View>
-                    :<View style={{justifyContent: 'center', margin: 10}}>
-                        <View style={{flexDirection: 'row', marginTop: 10, justifyContent: 'space-around'}}>
+                    :<View style={{justifyContent: 'center'}}>
+                        <View style={{flexDirection: 'row', marginTop: 10, justifyContent: 'center', marginBottom: 10}}>
                             <TouchableWithoutFeedback onPress={()=>this.setState({tab3:0, tab4:1, tab5:1})}>
-                            <ImageBackground source={rectangle[this.state.tab3]} style={{width:100, height: 30, alignItems: 'center', justifyContent: 'center'}}>
-                                <Text style={{color:'#FFFFFF', textAlign: 'center'}}>球队对比</Text>
-                            </ImageBackground>
+                                <View style={{backgroundColor: tabColor[this.state.tab3+1], borderColor: '#C01E2F', borderWidth:1, borderStyle: 'solid', alignItems: 'center', width:100, height: 30, justifyContent: 'center'}}>
+                                    <Text style={{color:tabColor[this.state.tab3], textAlign: 'center'}}>球队对比</Text>
+                                </View>
                             </TouchableWithoutFeedback>
                             <TouchableWithoutFeedback onPress={()=>this.setState({tab3:1, tab4:0, tab5:1})}>
-                                <ImageBackground source={rectangle[this.state.tab4]} style={{color: 'red',width:100, height: 30, alignItems: 'center', justifyContent: 'center'}}>
-                                    <Text style={{color:'#FFFFFF', textAlign: 'center'}}>{chineseName[home_id]}</Text>
-                                </ImageBackground>
+                                <View style={{backgroundColor: tabColor[this.state.tab4+1], borderColor: '#C01E2F', borderWidth:1, borderStyle: 'solid', width:100, height: 30, justifyContent: 'center'}}>
+                                    <Text style={{color:tabColor[this.state.tab4], textAlign: 'center'}}>{chineseShortName[home_id]}</Text>
+                                </View>
                             </TouchableWithoutFeedback>
                             <TouchableWithoutFeedback onPress={()=>this.setState({tab3:1, tab4:1, tab5:0})}>
-                                <ImageBackground source={rectangle[this.state.tab5]} style={{width:100, height: 30, alignItems: 'center', justifyContent: 'center'}}>
-                                    <Text style={{color:'#FFFFFF', textAlign: 'center'}}>{chineseName[away_id]}</Text>
-                                </ImageBackground>
+                                <View style={{backgroundColor: tabColor[this.state.tab5+1], borderColor: '#C01E2F', borderWidth:1, borderStyle: 'solid', width:100, height: 30, justifyContent: 'center'}}>
+                                    <Text style={{color:tabColor[this.state.tab5], textAlign: 'center'}}>{chineseShortName[away_id]}</Text>
+                                </View>
                             </TouchableWithoutFeedback>
                         </View>
-                        <View style={{flexDirection: 'row',justifyContent: 'space-around', alignItems: 'center'}}>
-                            <Image source={logo[home_id]} style={{width: 58, height: 58, marginBottom: 5, marginRight: 50}}/>
-                            <Text style={{fontFamily: 'DINCond-Bold', fontSize: 22, color: 'rgba(0, 0, 0, 0.54)'}}>VS</Text>
-                            <Image source={logo[away_id]} style={{width: 58, height: 58, marginBottom: 5, marginLeft:50}}/>
-                        </View>
-                        <FlatList 
-                        data = {teamVertical}
-                        keyExtractor={(item, index) => 'key'+index}
-                        renderItem={({item, index})=>
-                        <View style={{marginBottom: 30}}>
-                            <View style={{flexDirection: 'row', justifyContent: 'space-around', marginBottom:10, alignItems: 'center'}}>
-                                <Text style={{fontFamily: 'DINCond-Bold', fontSize: 20, color: 'rgba(0, 0, 0, 0.54)'}}>{this.state.dataDetail.homeAdvance[item][0]}</Text>
-                                <Text>{teamVerticalChinese[index]}</Text>
-                                <Text style={{fontFamily: 'DINCond-Bold', fontSize: 20, color: 'rgba(0, 0, 0, 0.54)'}}>{this.state.dataDetail.awayAdvance[item][0]}</Text>
+                        {this.state.tab3?null:
+                        <View>
+                            <View style={{flexDirection: 'row',justifyContent: 'space-around', alignItems: 'center'}}>
+                                <Image source={logo[home_id]} style={{width: 58, height: 58, marginBottom: 5, marginRight: 50}}/>
+                                <Text style={{fontFamily: 'DINCond-Bold', fontSize: 22, color: 'rgba(0, 0, 0, 0.54)'}}>VS</Text>
+                                <Image source={logo[away_id]} style={{width: 58, height: 58, marginBottom: 5, marginLeft:50}}/>
                             </View>
-                            <View style={{flexDirection:'row', flex:1}}>
-                                {this.state.dataDetail.homeAdvance[item][1] > this.state.dataDetail.awayAdvance[item][1]?
-                                <View style={{flexDirection:'row',flex:1}}>
-                                    <View style={{height: 10, backgroundColor: '#F2F2F2', flex:1-this.state.dataDetail.homeAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1]) || 1}}></View>
-                                    <View style={{height: 10, backgroundColor: '#C01E2F', flex:this.state.dataDetail.homeAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1])}}></View>
-                                    <View style={{height: 10, backgroundColor: '#BDBDBD', flex:this.state.dataDetail.awayAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1])}}></View>
-                                    <View style={{height: 10, backgroundColor: '#F2F2F2', flex:1-this.state.dataDetail.awayAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1]) || 1}}></View>
+                            <FlatList 
+                            data = {teamVertical}
+                            keyExtractor={(item, index) => 'key'+index}
+                            renderItem={({item, index})=>
+                            <View style={{marginBottom: 30}}>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-around', marginBottom:10, alignItems: 'center'}}>
+                                    <Text style={{fontFamily: 'DINCond-Bold', fontSize: 20, color: 'rgba(0, 0, 0, 0.54)'}}>{this.state.dataDetail.homeAdvance[item][0]}</Text>
+                                    <Text>{teamVerticalChinese[index]}</Text>
+                                    <Text style={{fontFamily: 'DINCond-Bold', fontSize: 20, color: 'rgba(0, 0, 0, 0.54)'}}>{this.state.dataDetail.awayAdvance[item][0]}</Text>
                                 </View>
-                                :<View style={{flexDirection:'row',flex:1}}>
-                                    <View style={{height: 10, backgroundColor: '#F2F2F2', flex:1-this.state.dataDetail.homeAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1]) || 1}}></View>
-                                    <View style={{height: 10, backgroundColor: '#BDBDBD', flex:this.state.dataDetail.homeAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1])}}></View>
-                                    <View style={{height: 10, backgroundColor: '#C01E2F', flex:this.state.dataDetail.awayAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1])}}></View>
-                                    <View style={{height: 10, backgroundColor: '#F2F2F2', flex:1-this.state.dataDetail.awayAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1]) || 1}}></View>
+                                <View style={{flexDirection:'row', flex:1}}>
+                                    {this.state.dataDetail.homeAdvance[item][1] > this.state.dataDetail.awayAdvance[item][1]?
+                                    <View style={{flexDirection:'row',flex:1}}>
+                                        <View style={{height: 10, backgroundColor: '#F2F2F2', flex:1-this.state.dataDetail.homeAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1]) || 1}}></View>
+                                        <View style={{height: 10, backgroundColor: '#C01E2F', flex:this.state.dataDetail.homeAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1])}}></View>
+                                        <View style={{height: 10, backgroundColor: '#BDBDBD', flex:this.state.dataDetail.awayAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1])}}></View>
+                                        <View style={{height: 10, backgroundColor: '#F2F2F2', flex:1-this.state.dataDetail.awayAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1]) || 1}}></View>
+                                    </View>
+                                    :<View style={{flexDirection:'row',flex:1}}>
+                                        <View style={{height: 10, backgroundColor: '#F2F2F2', flex:1-this.state.dataDetail.homeAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1]) || 1}}></View>
+                                        <View style={{height: 10, backgroundColor: '#BDBDBD', flex:this.state.dataDetail.homeAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1])}}></View>
+                                        <View style={{height: 10, backgroundColor: '#C01E2F', flex:this.state.dataDetail.awayAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1])}}></View>
+                                        <View style={{height: 10, backgroundColor: '#F2F2F2', flex:1-this.state.dataDetail.awayAdvance[item][1]/(this.state.dataDetail.homeAdvance[item][1]+this.state.dataDetail.awayAdvance[item][1]) || 1}}></View>
+                                    </View>
+                                    }
                                 </View>
-                                }
-                                
+                            </View>
+                            }
+                            />
+                        </View>
+                        }
+                        {this.state.tab4?null:
+                        <View>
+                        <FlatList
+                        data={this.state.dataDetail.homeStartPlayer.concat(this.state.dataDetail.homeReservePlayer)}
+                        keyExtractor={(item, index) => 'key'+index}
+                        ListHeaderComponent={
+                            <View style={{height:30,flexDirection: 'row', justifyContent:'space-around',flex:1, backgroundColor: '#E0E0E0', alignItems: 'center'}}>
+                                <View style={{minWidth: 100}}>
+                                    <Text>球员</Text>
+                                </View>
+                                <Text style={{minWidth: 20}}>时间</Text>
+                                <Text style={{minWidth: 20}}>得分</Text>
+                                <Text style={{minWidth: 20}}>篮板</Text>
+                                <Text style={{minWidth: 20}}>助攻</Text>
+                                <Text style={{minWidth: 40}}>投篮</Text>
+                            </View>
+                        }
+                        renderItem={({item, index})=>
+                        <View>
+                        <TouchableWithoutFeedback onPress={()=>{this.setState({modalVisible: true, player_id: item.player_id})}}>
+                           <View style={{flexDirection: 'row', flex:1}}>
+                                <View style={{paddingLeft: 10, minWidth: 120, height:40, justifyContent: 'center', borderRightColor:'#E0E0E0', borderRightWidth:1,borderStyle:'solid'}}>
+                                    <Text>{item.name}</Text>
+                                </View>
+                                <View style={{flexDirection: 'row', justifyContent:'space-around',flex:1, backgroundColor: dataColor[index%2], height:40, alignItems:'center'}}>
+                                    <Text style={{minWidth: 20}}>{item.mins}</Text>
+                                    <Text style={{minWidth: 20}}>{item.pts}</Text>
+                                    <Text style={{minWidth: 20}}>{item.reb}</Text>
+                                    <Text style={{minWidth: 20}}>{item.asts}</Text>
+                                    <Text style={{minWidth: 40}}>{item.fg}</Text>
+                                </View>
+                            </View>
+                            </TouchableWithoutFeedback>
+                        </View>
+                        }
+                        />
+                        </View>
+                        }
+                        {this.state.tab5?null:
+                        <FlatList
+                        data={this.state.dataDetail.awayStartPlayer.concat(this.state.dataDetail.awayReservePlayer)}
+                        keyExtractor={(item, index) => 'key'+index}
+                        ListHeaderComponent={
+                            <View style={{height:30,flexDirection: 'row', justifyContent:'space-around',flex:1, backgroundColor: '#E0E0E0', alignItems: 'center'}}>
+                                <View style={{minWidth: 100}}>
+                                    <Text>球员</Text>
+                                </View>
+                                <Text style={{minWidth: 20}}>时间</Text>
+                                <Text style={{minWidth: 20}}>得分</Text>
+                                <Text style={{minWidth: 20}}>篮板</Text>
+                                <Text style={{minWidth: 20}}>助攻</Text>
+                                <Text style={{minWidth: 40}}>投篮</Text>
+                            </View>
+                        }
+                        renderItem={({item, index})=>
+                        <View>
+                            <View style={{flexDirection: 'row'}}>
+                                <View style={{paddingLeft: 10,minWidth: 120,height: 40, justifyContent:'center', borderRightColor:'#E0E0E0', borderRightWidth:1,borderStyle:'solid'}}>
+                                    <Text>{item.name}</Text>
+                                </View>
+                                <View style={{height: 40,flexDirection: 'row', justifyContent:'space-around',flex:1, backgroundColor: dataColor[index%2], alignItems: 'center'}}>
+                                    <Text style={{minWidth: 20}}>{item.mins}</Text>
+                                    <Text style={{minWidth: 20}}>{item.pts}</Text>
+                                    <Text style={{minWidth: 20}}>{item.reb}</Text>
+                                    <Text style={{minWidth: 20}}>{item.asts}</Text>
+                                    <Text style={{minWidth: 40}}>{item.fg}</Text>
+                                </View>
                             </View>
                         </View>
                         }
                         />
+                        }
                     </View>
                     }
                 </ScrollView>
