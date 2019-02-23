@@ -44,7 +44,7 @@ export default class TopicScreen extends React.Component {
             <View>
             <View style={{backgroundColor: 'black', height: StatusBar.currentHeight}}></View>
             <ScrollView style={{marginBottom: 30}}>
-                <ImageBackground source={{uri: this.state.dataSource.img_m}} imageStyle={{opacity:1}} style={{width:Dimensions.get("window").width,  height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center'}}>
+                <ImageBackground resizeMethod={'scale'} source={{uri: this.state.dataSource.img_m.slice(0,this.state.dataSource.img_m.indexOf('?'))}} imageStyle={{opacity:1}} style={{width:Dimensions.get("window").width,  height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center'}}>
                     <Text style={{color: '#fff', fontWeight: '500', fontSize: 18, marginLeft: 30,marginRight:30, lineHeight:30}}>{this.state.dataSource.title}</Text>
                 </ImageBackground>
                 <FlatList
@@ -64,7 +64,7 @@ export default class TopicScreen extends React.Component {
                             keyExtractor={(item, index) => 'key'+index}
                             renderItem={({item}) =>
                             <TouchableOpacity style={{flexDirection:'row', paddingTop:10, paddingBottom:10, marginBottom:4}} onPress={() =>  {item.type==1?navigation.navigate('News', { nid: item.nid, replies: item.replies}): navigation.navigate('Details', { name:'湿乎乎的话题',fid: 1048, tid: item.link.slice(19,27)})}}>
-                                <Image source={{uri:item.img||item.thumbs[0]}} style={{width:90, height:70}}/>
+                                <Image source={{uri:item.img.slice(0,item.img.indexOf('?'))||item.thumbs[0]}} style={{width:90, height:70}}/>
                                 <View style={{flexDirection:"column", justifyContent: "space-between", flex:1}}>
                                 <Text style={{marginLeft:10}}>{item.title}</Text>
                                 <View style={{flexDirection:"row", marginLeft:10}}>

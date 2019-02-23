@@ -4,7 +4,7 @@ import  MD5  from 'react-native-md5';
 var DomParser = require('dom-parser');
 import HTML from 'react-native-render-html';
 import { logo, chineseName, color, chineseShortName, teamVertical, teamVerticalChinese } from '../constants/Team';
-import { WebView,Modal, View, StyleSheet, Text, Image, ActivityIndicator,Dimensions,StatusBar,ImageBackground,ScrollView, FlatList, TouchableWithoutFeedback, Linking} from 'react-native';
+import { WebView,Modal, View, StyleSheet, Text, Image, ActivityIndicator,Dimensions,StatusBar,Platform,ImageBackground,ScrollView, FlatList, TouchableWithoutFeedback, Linking} from 'react-native';
 var tabColor = ['#fff', '#C01E2F', '#fff'];
 const dataColor=['#F2F2F2', '#fff'];
 var gid = '';
@@ -120,8 +120,8 @@ export default class GameDetailScreen extends React.Component {
                 </Modal>
                 <View style={{backgroundColor: 'black', height: StatusBar.currentHeight}}></View>
                 <ScrollView>
-                    <ImageBackground source={{uri: this.state.dataSource.img.imgUrl}} style={{position: this.state.position, width: this.state.dataSource.img.width, height: this.state.dataSource.img.height}}>
-                        <View style={{backgroundColor: 'rgba(0, 0, 0, 0.38)', height: this.state.dataSource.img.height, justifyContent:'space-between'}}>
+                    <ImageBackground source={{uri: this.state.dataSource.img.imgUrl}} style={{position: this.state.position, width: this.state.dataSource.img.width, height: 300}}>
+                        <View style={{backgroundColor: 'rgba(0, 0, 0, 0.38)', height: 300, justifyContent:'space-between'}}>
                         <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                             <TouchableWithoutFeedback onPress={()=>{
                                 this.setState({
@@ -185,7 +185,7 @@ export default class GameDetailScreen extends React.Component {
                         </View>
                     </ImageBackground>
                     {this.state.tab1?
-                    <View style={{zIndex: 2, margin: 15, top:this.state.dataSource.img.height-50, justifyContent: 'center'}}>
+                    <View style={{zIndex: 2, margin: 15, top:200, justifyContent: 'center'}}>
                         <View style={{borderStyle: 'solid', borderColor: '#F7F5F5', borderWidth: 1, backgroundColor: '#fff', elevation:0.5 }}>
                             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20,}}>
                                 <View>
@@ -216,7 +216,7 @@ export default class GameDetailScreen extends React.Component {
                             keyExtractor={(item, index) => 'key'+index}
                             renderItem={({item})=>
                                 <View style={{flexDirection: 'row', margin: 10}}>
-                                    <Image source={{uri: item.url}} style={{width:40, height:40, borderRadius:50}}/>
+                                    <Image source={{uri: item.url}} style={styles.header}/>
                                     <View style={{flex:1}}>
                                         <Text style={{marginLeft: 10}}>{item.name}</Text>
                                         <View style={{flexDirection: 'row',justifyContent:'space-between'}}>
@@ -392,3 +392,18 @@ export default class GameDetailScreen extends React.Component {
         )
     }
 }
+
+const styles = StyleSheet.create({
+    header:{
+        width: 40, 
+        height: 40, 
+        ...Platform.select({
+            ios: {
+                borderRadius:15,
+            },
+            android: {
+                borderRadius:50
+            },
+        }), 
+    }
+})

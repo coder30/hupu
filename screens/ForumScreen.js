@@ -52,6 +52,7 @@ export default class SettingsScreen extends React.Component {
     fetch(url)
       .then((Response)=>Response.json())
       .then((ResponseJson)=>{
+        console.log(url);
         this.setState({
           isLoading: false,
           forumData: ResponseJson.data
@@ -158,8 +159,8 @@ export default class SettingsScreen extends React.Component {
             navigation.navigate('Details', { fid: item.fid, tid: item.tid, name: item.forum_name, logo: item.forum_logo})} 
           }>
             <View style={{ paddingBottom:5, flexDirection: 'row', paddingTop:5}}>
-              <Image source={{uri: item.forum_logo}} style={{width: 28, height: 25, marginRight:5}}/>
-              <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12, height:25, lineHeight:25}}>{item.forum_name}</Text>
+              <Image source={{uri: item.topic.logo||item.forum_logo}} style={{width: 25, height: 23, marginRight:5, borderRadius: 5}}/>
+              <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12, height:25, lineHeight:25}}>{item.topic.topic_name||item.forum_name}</Text>
               <Text style={{color:'rgba(0, 0, 0, 0.38)', fontSize: 10, paddingLeft: 12, height:25, lineHeight:25}}>{item.userName}</Text>
             </View>
             <Text  style={{fontSize: 15, marginBottom: 5, color: this.state.color[index]}}>{item.title}</Text>

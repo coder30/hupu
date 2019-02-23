@@ -1,6 +1,7 @@
 import React from 'react';
 import { Video } from 'expo';
 import MD5  from"react-native-md5";
+import { Platform } from 'react-native';
 import VideoPlayer from '@expo/videoplayer';
 import HTML from 'react-native-render-html';
 import Rectangle from '../components/Rectangle';
@@ -194,7 +195,7 @@ export default class PostScreen extends React.Component {
                     <View style={styles.header}>
                         <Text style={{fontSize:22,fontWeight:'500', marginBottom:5}}>{res.title}</Text>
                         <View style={{flexDirection:'row', marginBottom: 10, marginTop: 10}}>
-                            <Image source={{uri: res.userImg}} style={{width: 30, height: 30, marginRight:5, borderRadius:50}}/>
+                            <Image source={{uri: res.userImg}} style={styles.avatar}/>
                             <View style={{ marginLeft: 10}}>
                                 <Text style={{fontSize:12}}>{res.username}</Text>
                                 <Text style={{color:'#9A9898', fontSize:12, paddingRight:5}}>{res.time} 阅读 {res.visits}</Text>
@@ -210,7 +211,7 @@ export default class PostScreen extends React.Component {
                                 keyExtractor={(item, index) => 'key'+index} 
                                 renderItem={({item}) =>
                                 <View style={styles.card}>
-                                    <Image source={{uri: item.userImg}} style={{width: 30, height: 30, marginRight:5, borderRadius:50}}/>
+                                    <Image source={{uri: item.userImg}} style={styles.avatar}/>
                                     <View style={{flex:1}}>
                                         <View style={{flexDirection:'row', justifyContent: 'space-between', alignItems: 'center'}}>
                                             <View style={{flexDirection:'row', alignItems:'center'}}>
@@ -254,7 +255,7 @@ export default class PostScreen extends React.Component {
                                 extraData={this.state}
                                 renderItem={({item}) =>
                                 <View style={styles.card}>
-                                    <Image source={{uri: item.userImg}} style={{width: 30, height: 30, marginRight:5, borderRadius:50}}/>
+                                    <Image source={{uri: item.userImg}} style={styles.avatar}/>
                                     <View style={{flex:1}}>
                                         <View style={{flexDirection:'row', justifyContent: 'space-between', alignItems: 'center'}}>
                                             <View style={{flexDirection:'row', alignItems:'center'}}>
@@ -336,5 +337,18 @@ const styles = StyleSheet.create({
         padding: 5,
         marginBottom: 10,
         marginTop: 10
+    },
+    avatar: {
+        width: 30, 
+        height: 30, 
+        marginRight:5,
+        ...Platform.select({
+            ios: {
+                borderRadius:15,
+            },
+            android: {
+                borderRadius:50
+            },
+        }), 
     }
 });

@@ -40,10 +40,11 @@ export default class Plate extends React.Component {
                 var temp = this.state.color;
                 console.log(url);
                 for(let i=0; i<ResponseJson.result.data.length; i++){
-                    temp.push('black')
-                    if(ResponseJson.result.data[i].badge[0] && ResponseJson.result.data[i].badge[0].name=='广告'){
+                    if(ResponseJson.result.data[i].badge==undefined || ResponseJson.result.data[i].badge.length && ResponseJson.result.data[i].badge[0].name=='广告'){
                         ResponseJson.result.data.splice(i, 1);
                     }
+                    else    
+                        temp.push('black');
                 }
                 var data = this.state.dataSource.concat(ResponseJson.result.data);
                 var page = this.state.page;

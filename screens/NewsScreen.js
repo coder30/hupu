@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import MD5  from"react-native-md5";
 import HTML from 'react-native-render-html';
 import ImageViewer from 'react-native-image-zoom-viewer';
@@ -41,7 +42,7 @@ export default class NewsScreen extends React.Component {
                     isLoading: false,
                     dataSource: ResponseJson.result.offline_data.data.news,
                     replySource: result.data,
-                    ncid: result.data.data[result.data.data.length-1].ncid,
+                    ncid: result.data.data.length && result.data.data[result.data.data.length-1].ncid,
                     create_time: result.data.data[result.data.data.length-1].create_time
                 })
             })
@@ -155,7 +156,7 @@ export default class NewsScreen extends React.Component {
                 />
             </Modal>
             <ScrollView showsVerticalScrollIndicator = {false} onMomentumScrollEnd = {this._contentViewScroll.bind(this)}>
-                <Image source={{uri: this.state.dataSource.img_m}} resizeMode='cover' style={{ width:Dimensions.get("window").width, height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center'}} />
+                <Image source={{uri: this.state.dataSource.img_m.slice(0,this.state.dataSource.img_m.indexOf('?'))}} resizeMode='cover' style={{ width:Dimensions.get("window").width, height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center'}} />
                 <View style={{padding: 10}}>
                     <Text style={{fontWeight: 'bold', fontSize: 20, marginBottom: 10}}>{this.state.dataSource.title}</Text>
                     <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>来源:{this.state.dataSource.origin}   {this.state.dataSource.addtime}</Text>
@@ -169,7 +170,7 @@ export default class NewsScreen extends React.Component {
                         keyExtractor={(item, index) => 'key'+index}
                         renderItem={({item}) =>
                         <View style={styles.card}>
-                            <Image source={{uri: item.header}} style={{width: 30, height: 30, marginRight:5, borderRadius:50}}/>
+                            <Image source={{uri: item.header}} style={styles.header}/>
                             <View style={{flex:1, marginBottom: 4}}>
                                 <View style={{flexDirection:'row', justifyContent: 'space-between', alignItems: 'center'}}>
                                     <View style={{flexDirection:'row', alignItems:'center'}}>
@@ -203,7 +204,7 @@ export default class NewsScreen extends React.Component {
                         keyExtractor={(item, index) => 'key'+index}
                         renderItem={({item}) =>
                         <View style={styles.card}>
-                            <Image source={{uri: item.header}} style={{width: 30, height: 30, marginRight:5, borderRadius:50}}/>
+                            <Image source={{uri: item.header}} style={styles.header}/>
                             <View style={{flex:1, marginBottom: 4}}>
                                 <View style={{flexDirection:'row', justifyContent: 'space-between', alignItems: 'center'}}>
                                     <View style={{flexDirection:'row', alignItems:'center'}}>
@@ -256,5 +257,18 @@ const styles = StyleSheet.create({
         padding: 5,
         marginBottom: 10,
         marginTop: 10
+    },
+    header: {
+        width: 30, 
+        height: 30, 
+        marginRight:5,
+        ...Platform.select({
+            ios: {
+                borderRadius:15,
+            },
+            android: {
+                borderRadius:50
+            },
+        }), 
     }
 })

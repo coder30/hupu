@@ -247,7 +247,7 @@ export default class HomeScreen extends React.Component {
                 this.setState({color: temp});
                 item.type==1?navigation.navigate('News', { nid: item.nid, replies: item.replies}): navigation.navigate('Details', { name:'湿乎乎的话题',fid: 1048, tid: item.link.slice(19,27)})}
                 }>
-                <Image source={{uri:item.img||item.thumbs[0]}} style={{width:90, height:70}}/>
+                <Image source={{uri:item.img.slice(0,item.img.indexOf('?'))||item.thumbs[0]}} style={{width:90, height:70}} />
                 <View style={{flexDirection:"column", justifyContent: "space-between", flex:1}}>
                   <Text style={{marginLeft:10, color: this.state.color[index]}}>{item.title}</Text>
                   <View style={{flexDirection:"row", marginLeft:10}}>

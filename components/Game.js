@@ -46,10 +46,6 @@ export default class Game extends React.Component {
             console.log(error);
           })
       }
-    onLayout() {
-      this.list.scrollToIndex({index: this.state.index})
-    }
-    
     render() {
         if(this.state.isLoading){
             return(
@@ -59,14 +55,13 @@ export default class Game extends React.Component {
             )
         }
         return (
-          <View onLayout={() => this.onLayout()}>
             <FlatList
-                style= {{marginBottom: 50}}
                 keyExtractor={(item, index) => 'key'+index}
                 ref={el => this.list = el}
                 extraData={this.state}
                 data={this.state.dataSource} 
                 showsVerticalScrollIndicator = {false}
+                initialScrollIndex={this.state.index}
                 renderItem={({item}) =>
                 <View>
                     <Text style={styles.gameDate}>{item.date_block}</Text>
@@ -133,7 +128,6 @@ export default class Game extends React.Component {
                     }/>
                 </View>
             }/>
-            </View>
         );
     }
 }
