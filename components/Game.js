@@ -12,7 +12,7 @@ export default class Game extends React.Component {
         Font.loadAsync({
           'DINCond-Bold': require('../assets/fonts/DINCond-Bold.otf'),
         });
-        return fetch('https://games.mobileapi.hupu.com/1/7.3.2/nba/getMatchs?crt=1548734093560&night=0&channel=miui&sign=32cd5aaf9265ab0333397d618529f7a7&client=316810195181635&_ssid=IkExMzAzLTVHIg%3D%3D&time_zone=Asia%2FShanghai&android_id=36f92b5c1454e1e9')
+        return fetch('https://games.mobileapi.hupu.com/1/7.3.2/nba/getMatchs?crt=1548734093560&night=0&channel=miui&sign=32cd5aaf9265ab0333397d618529f7a7&client=316810195181635&_ssid=IkExMzAzLTVHIg==&time_zone=Asia/Shanghai&android_id=36f92b5c1454e1e9')
           .then((Response)=>Response.json())
           .then((ResponseJson) => {
             var res = ResponseJson.result.games;
@@ -22,17 +22,22 @@ export default class Game extends React.Component {
                 index = i;
               }
               for(var j=0; j<res[i].data.length; j++){
-                if(res[i].data[j].status.id==3){
-                  res[i].data[j].home_score = '';
-                  res[i].data[j].away_score = '';
-                }
-                if(Number(res[i].data[j].home_score) > Number(res[i].data[j].away_score)){
-                  res[i].data[j].home_color = '#C01E2F'
-                  res[i].data[j].away_color = 'rgba(0, 0, 0, 0.54)'
+                if(res[i].data[j].style=='match'){
+                  if(res[i].data[j].status.id==3){
+                    res[i].data[j].home_score = '';
+                    res[i].data[j].away_score = '';
+                  }
+                  if(Number(res[i].data[j].home_score) > Number(res[i].data[j].away_score)){
+                    res[i].data[j].home_color = '#C01E2F'
+                    res[i].data[j].away_color = 'rgba(0, 0, 0, 0.54)'
+                  }
+                  else {
+                    res[i].data[j].home_color = 'rgba(0, 0, 0, 0.54)'
+                    res[i].data[j].away_color = '#C01E2F'
+                  }
                 }
                 else {
-                  res[i].data[j].home_color = 'rgba(0, 0, 0, 0.54)'
-                  res[i].data[j].away_color = '#C01E2F'
+                  res[i].data.splice(j, 1);
                 }
               }
             }
@@ -61,13 +66,17 @@ export default class Game extends React.Component {
                 extraData={this.state}
                 data={this.state.dataSource} 
                 showsVerticalScrollIndicator = {false}
-                initialScrollIndex={this.state.index}
+                initialNumToRender={10}
                 renderItem={({item}) =>
                 <View>
                     <Text style={styles.gameDate}>{item.date_block}</Text>
                     <FlatList
                         data={item.data}
                         keyExtractor={(item, index) => 'key'+index}
+                        getItemLayout={(data, index) => (
+                          // 120 是被渲染 item 的高度 ITEM_HEIGHT。
+                          {length: 120, offset: 120 * index, index}
+                        )}
                         renderItem={({item}) =>
                         <View>
                             {item.home.name=="数据乱斗" ? null :
@@ -82,8 +91,14 @@ export default class Game extends React.Component {
                                 })}
                             }>
                               <View style={styles.gameCard}>
-                                  <Image source={logo[item.home.id] || {uri: item.home.logo}} style={{width: 54, height: 54, marginRight:3, marginLeft: -20}}/>
-                                  <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35}}>{name[item.home.id]||item.home.name}</Text>
+                                  {name[item.home.id]?
+                                  <Image source={logo[item.home.id] } style={{width: 54, height: 54}}/>
+                                  :<Image source={{uri: item.home.logo}} style={{width: 34, height: 34}}/>
+                                  } 
+                                  {name[item.home.id]?
+                                  <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:45}}>{name[item.home.id]}</Text>
+                                  :<Text style={{fontFamily: 'DINCond-Bold', fontSize: 12, color: 'rgba(0, 0, 0, 0.38)',minWidth:45}}>{item.home.name}</Text>
+                                  }      
                                   <View style={{flexDirection: 'row', alignItems: 'center', flex:2, justifyContent: 'space-between', maxWidth: 200, minWidth: 150}}>
                                   {item.home_score!=''?
                                   <Text style={{padding:5, fontFamily: 'DINCond-Bold', fontSize: 24, color: item.home_color, minWidth:40, marginLeft: -10}}>{item.home_score}</Text>
@@ -119,8 +134,14 @@ export default class Game extends React.Component {
                                   :<View style={{marginLeft: 16}}></View>
                                   }
                                   </View>
-                                  <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:35}}>{name[item.away.id]||item.away.name}</Text>
-                                  <Image source={logo[item.away.id]  || {uri: item.away.logo}} style={{width: 54, height: 54, marginRight:3 ,marginRight: -20}}/> 
+                                  {name[item.away.id]?
+                                  <Text style={{fontFamily: 'DINCond-Bold', fontSize: 18, color: 'rgba(0, 0, 0, 0.38)',minWidth:45, textAlign: 'right'}}>{name[item.away.id]}</Text>
+                                  :<Text style={{fontFamily: 'DINCond-Bold', fontSize: 12, color: 'rgba(0, 0, 0, 0.38)',minWidth:45, textAlign: 'center'}}>{item.away.name}</Text>
+                                  } 
+                                  {name[item.away.id]?
+                                  <Image source={logo[item.away.id] }  style={{width: 54, height: 54}}/>
+                                  :<Image source={{uri: item.away.logo}}  style={{width: 34, height: 34}}/>
+                                  }                                      
                               </View>
                             </TouchableWithoutFeedback>
                             }

@@ -2,7 +2,6 @@ import React from 'react';
 import { Video } from 'expo';
 import MD5  from"react-native-md5";
 import { Platform } from 'react-native';
-import VideoPlayer from '@expo/videoplayer';
 import HTML from 'react-native-render-html';
 import Rectangle from '../components/Rectangle';
 import ScaledImage from '../components/ScaledImage';
@@ -159,18 +158,17 @@ export default class PostScreen extends React.Component {
         return (
             <View>
                 {res.video_info.length==0?null:
-                    <VideoPlayer
-                        videoProps={{
-                            shouldPlay: false,
-                            resizeMode: Video.RESIZE_MODE_CONTAIN,
-                            source: {
-                            uri: res.video_info.src,
-                            },
-                        }}
-                        isPortrait={true}
-                        playFromPositionMillis={0}
-                        showControlsOnLoad={true}
+                <View style={{backgroundColor: 'black'}}>
+                    <Video
+                    source={{ uri: res.video_info.src }}
+                    rate={1.0}
+                    volume={1.0}
+                    isMuted={false}
+                    resizeMode="contain"
+                    useNativeControls
+                    style={{ width: Dimensions.get("window").width, height: 200 }}
                     />
+                </View>
                 }
                 <Modal
                 visible={this.state.modalVisible}
@@ -247,7 +245,7 @@ export default class PostScreen extends React.Component {
                         </View>
                     }
                     {res.error || !this.state.replySource.list.length?null:
-                        <View>
+                        <View style={{marginBottom: 20}}>
                             <Rectangle type="reply"/>
                             <FlatList
                                 data={this.state.replySource.list}
