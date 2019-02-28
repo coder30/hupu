@@ -43,7 +43,7 @@ export default class NewsScreen extends React.Component {
                     dataSource: ResponseJson.result.offline_data.data.news,
                     replySource: result.data,
                     ncid: result.data.data.length && result.data.data[result.data.data.length-1].ncid,
-                    create_time: result.data.data[result.data.data.length-1].create_time
+                    create_time: result.data.data.length && result.data.data[result.data.data.length-1].create_time
                 })
             })
     }
@@ -115,8 +115,8 @@ export default class NewsScreen extends React.Component {
                 this.state.replySource.data = list; 
                 this.setState({
                     replySource: this.state.replySource,
-                    ncid: result.data.data[result.data.data.length-1].ncid,
-                    create_time: result.data.data[result.data.data.length-1].create_time,
+                    ncid: result.data.data.length&&result.data.data[result.data.data.length-1].ncid,
+                    create_time: result.data.data.length&&result.data.data[result.data.data.length-1].create_time,
                     hasNextPage: result.data.hasNextPage
                 })
                 console.log(result.data.hasNextPage);
@@ -156,7 +156,7 @@ export default class NewsScreen extends React.Component {
                 />
             </Modal>
             <ScrollView showsVerticalScrollIndicator = {false} onMomentumScrollEnd = {this._contentViewScroll.bind(this)}>
-                <Image source={{uri: this.state.dataSource.img_m.slice(0,this.state.dataSource.img_m.indexOf('?'))}} resizeMode='cover' style={{ width:Dimensions.get("window").width, height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center'}} />
+                <Image source={{uri: this.state.dataSource.img_m.slice(0,this.state.dataSource.img_m.indexOf('?'))}} resizeMode='cover' style={{ width:Dimensions.get("window").width, height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center', backgroundColor: '#E5E5E5'}} />
                 <View style={{padding: 10}}>
                     <Text style={{fontWeight: 'bold', fontSize: 20, marginBottom: 10}}>{this.state.dataSource.title}</Text>
                     <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>来源:{this.state.dataSource.origin}   {this.state.dataSource.addtime}</Text>

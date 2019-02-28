@@ -20,7 +20,7 @@ export default class ScaledImage extends Component {
   }
   render() {
     return (
-      <Image source={this.state.source} style={{ height: this.state.height, width: this.state.width, marginBottom:10 }} />
+      <Image source={this.state.source} style={{ height: this.state.height, width: this.state.width, marginBottom:10, backgroundColor: '#E5E5E5' }} />
     );
   }
 }

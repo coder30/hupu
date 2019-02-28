@@ -7,7 +7,7 @@ import Rectangle from '../components/Rectangle';
 import ScaledImage from '../components/ScaledImage';
 import ImageViewer from 'react-native-image-zoom-viewer';
 
-import {View, Text,Linking, ActivityIndicator, FlatList, StyleSheet, ScrollView, Image, Dimensions ,ImageBackground,StatusBar, TouchableWithoutFeedback, Modal} from'react-native';
+import {View, Text,Linking, ActivityIndicator, FlatList, StyleSheet, ScrollView, Image, Dimensions ,StatusBar, TouchableWithoutFeedback, Modal} from'react-native';
 
 var images = []
 var flag = true;
@@ -113,7 +113,7 @@ export default class PostScreen extends React.Component {
                 }
                 return (
                     <TouchableWithoutFeedback key={Math.random()} onPress={() => this.setState({ modalVisible: true, index:i})}>
-                        <Image source={{uri: htmlAttribs.src}}  style={{width:width,height:h, marginBottom: 10}}/>             
+                        <Image source={{uri: htmlAttribs.src}}  style={{width:width,height:h, marginBottom: 10, backgroundColor: '#E5E5E5'}}/>             
                     </TouchableWithoutFeedback>
                 ) 
             }
