@@ -4,7 +4,7 @@ react native hupuApp
 
 android安装包地址：https://www.lanzous.com/i39q65e
 
-ios因为没有apple developer account所以暂未导出
+ios因为没有apple developer account所以暂未导出安装包
 
 ### 效果图
 <div style={display:flex;}>
