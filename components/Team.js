@@ -30,7 +30,6 @@ export default class Team extends React.Component {
     var offsetY = e.nativeEvent.contentOffset.y; //滑动距离
     var contentSizeHeight = e.nativeEvent.contentSize.height; //scrollView contentSize高度
     var oriageScrollHeight = e.nativeEvent.layoutMeasurement.height; //scrollView高度
-    //console.log(offsetY,contentSizeHeight, oriageScrollHeight);
     if(offsetY<630){
       this.setState({
         tab: 0

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator} from 'react-navigation';
 import CardStackStyleInterpolator from 'react-navigation-stack/src/views/StackView/StackViewStyleInterpolator';
 
@@ -13,6 +12,8 @@ import NewsScreen from '../screens/NewsScreen';
 import GameDetail from '../screens/GameDetail';
 import PlateScreen from '../screens/PlateScreen'
 
+let lastPick = new Date();
+
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
 });
@@ -25,6 +26,20 @@ HomeStack.navigationOptions = {
       name='home'
     />
   ),
+  tabBarOnPress: (scene) => {
+    const { navigation } = scene;
+    if(navigation.isFocused()){
+      if(navigation.state.routes[0].params){
+        let now = new Date();
+        if(now - lastPick < 500)
+          navigation.state.routes[0].params.scrollToTop();
+        lastPick = now;
+      }
+    }
+    else {
+      navigation.navigate('Home')
+    }
+  }
 };
 
 const GameStack = createStackNavigator({
@@ -39,6 +54,20 @@ GameStack.navigationOptions = {
       name='game'
     />
   ),
+  // tabBarOnPress: (scene) => {
+  //   const { navigation } = scene;
+  //   if(navigation.isFocused()){
+  //     if(navigation.state.routes[0].params){
+  //       let now = new Date();
+  //       if(now - lastPick < 700)
+  //         navigation.state.routes[0].params.scrollToTop();
+  //       lastPick = now;
+  //     }
+  //   }
+  //   else {
+  //     navigation.navigate('Game')
+  //   }
+  // }
 };
 
 const ForumStack = createStackNavigator({
@@ -48,12 +77,25 @@ const ForumStack = createStackNavigator({
 ForumStack.navigationOptions = {
   tabBarLabel: '论坛',
   tabBarIcon: ({ focused }) => (
-    
     <TabBarIcon
       focused={focused}
       name='forum'
     />
   ),
+  tabBarOnPress: (scene) => {
+    const { navigation } = scene;
+    if(navigation.isFocused()){
+      if(navigation.state.routes[0].params){
+        let now = new Date();
+        if(now - lastPick < 500)
+          navigation.state.routes[0].params.scrollToTop();
+        lastPick = now;
+      }
+    }
+    else {
+      navigation.navigate('Forum')
+    }
+  }
 };
 
 const TabNav = createBottomTabNavigator(

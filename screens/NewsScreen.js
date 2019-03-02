@@ -119,7 +119,6 @@ export default class NewsScreen extends React.Component {
                     create_time: result.data.data.length&&result.data.data[result.data.data.length-1].create_time,
                     hasNextPage: result.data.hasNextPage
                 })
-                console.log(result.data.hasNextPage);
                 if(result.data.hasNextPage)
                     flag = true;
             }

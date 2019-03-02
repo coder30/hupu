@@ -29,7 +29,6 @@ export default class Honour extends React.Component {
     var offsetY = e.nativeEvent.contentOffset.y; //滑动距离
     var contentSizeHeight = e.nativeEvent.contentSize.height; //scrollView contentSize高度
     var oriageScrollHeight = e.nativeEvent.layoutMeasurement.height; //scrollView高度
-    console.log(offsetY,contentSizeHeight, oriageScrollHeight);
     var i = Math.floor(offsetY/280);
     this.setState({
         tab: i

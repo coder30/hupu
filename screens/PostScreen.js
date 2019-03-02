@@ -12,28 +12,35 @@ import {View, Text,Linking, ActivityIndicator, FlatList, StyleSheet, ScrollView,
 var images = []
 var flag = true;
 var page=2;
+let lastPick = new Date();
+
 export default class PostScreen extends React.Component {
     static navigationOptions = ({navigation}) =>({  
         headerStyle: {
             backgroundColor: '#fff',
             textAlign: 'center',
-            elevation: 0
         },
-        headerTitleStyle: {
-            fontWeight: '300',
-            textAlign:"center", 
-            flex:1 ,
-            marginRight: 50
-        },
-        headerTitle: navigation.getParam('title', ''),
+        headerTitle: 
+        <TouchableWithoutFeedback onPress={()=>{
+            let now = new Date();
+            if(now - lastPick < 500){
+                navigation.getParam('_scrollToTop', '')();
+            }
+            lastPick = now;
+        }}>
+            <View style={{justifyContent: 'center', flex: 1}}>
+                <Text style={{textAlign: 'center',marginLeft:-50,fontSize:18,fontWeight: '300', color: 'rgba(0, 0, 0, 0.54)'}}>{navigation.getParam('title', '')}</Text>
+            </View>
+        </TouchableWithoutFeedback>,
         headerTintColor: 'rgba(0, 0, 0, 0.54)',
-        gesturesEnabled: true
+        gesturesEnabled: true,
     });  
     constructor(props){
         super(props);
         this.state = {isLoading: true, modalVisible: false, index:0,isPortrait: true}
     }
     async componentDidMount() {
+        this.props.navigation.setParams({ _scrollToTop: this._scrollToTop })
         page=2;
         flag = true;
         images=[];
@@ -66,6 +73,11 @@ export default class PostScreen extends React.Component {
                     replySource: resultJson_reply.data.result
                 })
             })
+    }
+    _scrollToTop = () => {
+        if(!!this.listRef){
+          this.listRef.scrollTo({x: 0, y: 0, animated: true});
+        }
     }
     alterNode(node) {
         node.attribs = { ...(node.attribs || {}), style: `line-height: 28%; font-size: 18%` };
@@ -103,7 +115,6 @@ export default class PostScreen extends React.Component {
                 }
                 if(i == images.length)
                     images.push({url:htmlAttribs.src})
-                //console.log(htmlAttribs.src);
                 if(!h){
                     return (
                         <TouchableWithoutFeedback key={Math.random()} onPress={() => this.setState({ modalVisible: true, index:i})}>
@@ -189,7 +200,10 @@ export default class PostScreen extends React.Component {
                     enableSwipeDown={true}
                 />
                 </Modal>
-                <ScrollView showsVerticalScrollIndicator = {false} onMomentumScrollEnd = {this._contentViewScroll.bind(this)}>
+                <ScrollView 
+                    showsVerticalScrollIndicator = {false} 
+                    onMomentumScrollEnd = {this._contentViewScroll.bind(this)}
+                    ref={(ref) => { this.listRef = ref; }}>
                     <View style={styles.header}>
                         <Text style={{fontSize:22,fontWeight:'500', marginBottom:5}}>{res.title}</Text>
                         <View style={{flexDirection:'row', marginBottom: 10, marginTop: 10}}>
