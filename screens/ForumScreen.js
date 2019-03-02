@@ -2,6 +2,7 @@ import React from 'react';
 import  MD5  from "react-native-md5";
 import { View, FlatList ,ActivityIndicator, Text, StyleSheet, Image, TouchableOpacity, ImageBackground, TouchableWithoutFeedback, Dimensions} from 'react-native';
 import LogoTitle from '../components/LogoTitle'
+let gestureHandlers = {};
 
 export default class SettingsScreen extends React.Component {
   static navigationOptions = {
@@ -12,6 +13,7 @@ export default class SettingsScreen extends React.Component {
   };
   constructor(props){
     super(props);
+    this.config = {changeX: 0}
     this.state = {isLoading: true, stamp: 0, lastTid: 0, flag: true, color: [], tab:0, plate: 0, addition_tid:-1};
     this.onEndReachedCalledDuringMomentum = true; 
   }
@@ -59,6 +61,26 @@ export default class SettingsScreen extends React.Component {
         })
       })
   }
+  componentWillMount(){
+    this.props.navigation.setParams({
+      scrollToTop: this._scrollToTop,
+    });
+    gestureHandlers = {
+      onStartShouldSetResponder: (e) => {
+        return true
+      },
+      onMoveShouldSetResponder: (e) => {return true},
+      onResponderGrant: (e) => {
+        this.config.changeX = e.nativeEvent.pageX;
+      },
+      onResponderMove: (e) => {
+        if(this.config.changeX > e.nativeEvent.pageX)
+          this.setState({tab:1});
+        else 
+          this.setState({tab:0});
+      },
+    }
+  }
   async componentDidMount() {
     this.getData();
   }
@@ -103,6 +125,10 @@ export default class SettingsScreen extends React.Component {
       this.getData()
     });
   }
+  _scrollToTop = () => {
+    if(!!this.flatListRef)
+      this.flatListRef.scrollToOffset({ offset: 0, animated: true });
+  }
   
   render() {
     const { navigation } = this.props;
@@ -114,7 +140,7 @@ export default class SettingsScreen extends React.Component {
       )
     }
     return (
-      <View>
+      <View {...gestureHandlers}>
         <View>
         {this.state.tab==0?
         <View style={{flexDirection: 'row', alignItems:'center'}}>
@@ -142,6 +168,7 @@ export default class SettingsScreen extends React.Component {
         {this.state.tab==0?
         <FlatList 
         data={this.state.dataSource} 
+        ref={(ref) => { this.flatListRef = ref; }}
         extraData={this.state}
         showsVerticalScrollIndicator = {false}
         keyExtractor={(item, index) => 'key'+index}
