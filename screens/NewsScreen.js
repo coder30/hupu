@@ -20,7 +20,6 @@ export default class NewsScreen extends React.Component {
         this.state = {isLoading: true, nid: 0, count: 0,modalVisible: false, index:0};
     }
     async componentDidMount() {
-        StatusBar.setBarStyle('light-content');
         flag = true;
         const { navigation } = this.props;
         const nid = navigation.getParam('nid');

@@ -18,7 +18,6 @@ export default class GameDetailScreen extends React.Component {
         this.state = {isLoading: true, tab1: 3, tab2: 0, position: 'absolute', tab3:0,tab4:1,tab5:1,modalVisible:false}
     }
     componentDidMount(){
-        StatusBar.setBarStyle('light-content');
         const { navigation } = this.props;
         Font.loadAsync({
             'DINCond-Bold': require('../assets/fonts/DINCond-Bold.otf'),

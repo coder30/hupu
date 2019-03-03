@@ -2,11 +2,26 @@ import React from 'react';
 import { Font } from 'expo';
 import MD5  from"react-native-md5";
 import { logo, name } from '../constants/Team';
-import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, TouchableWithoutFeedback} from 'react-native';
+import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, TouchableWithoutFeedback, Animated, Easing} from 'react-native';
 export default class Game extends React.Component {
     constructor(props){
         super(props);
-        this.state = {isLoading: true, index: 0}
+        this.state = {isLoading: true, index: 0, animatedValue: new Animated.Value(0)};
+        this.staggerAnimated = Animated.stagger(1000,
+          [
+              Animated.timing(
+                  this.state.animatedValue,
+                  {
+                      toValue: 1,
+                      duration: 5000,
+                      easing: Easing.in,
+                  }
+              )
+          ]
+        );
+    }
+    _startAnimated() {
+      this.staggerAnimated.start();
     }
     loadData(){
       let time = new Date().getTime();
@@ -63,12 +78,17 @@ export default class Game extends React.Component {
         this.loadData();
         this.intervalId = setInterval(() => {
           this.loadData();
-        }, 5000);
+        }, 10000);
+        this._startAnimated();
     }
     goIndex = () => {
       this.flatListRef.scrollToIndex({animated: true, index: this.state.index});
     };
     render() {
+      const marginLeft = this.state.animatedValue.interpolate({
+        inputRange: [0,1],
+        outputRange: [-80, 0]
+      })
         if(this.state.isLoading){
             return(
               <View style={{flex: 1, padding: 20}}>
@@ -78,17 +98,14 @@ export default class Game extends React.Component {
         }
         return (
           <View>
-            <TouchableWithoutFeedback onPress={()=>{
-                this.goIndex()
-              }
-            }>
-              <Image source={require('../assets/images/today.png')} style={{zIndex: 2,position: 'absolute' ,bottom: 60, right:10 ,width: 80, height: 80}}/>
+            <TouchableWithoutFeedback onPress={()=>{this.goIndex()}}>
+              <Animated.Image source={require('../assets/images/today.png')} style={{zIndex: 2,position: 'absolute' ,bottom: 10, right:10 ,width: 80, height: 65}}/>
             </TouchableWithoutFeedback>
             <FlatList
                 keyExtractor={(item, index) => 'key'+index}
                 ref={(ref) => { this.flatListRef = ref; }}
                 extraData={this.state}
-                style={{zIndex: 1, marginBottom: 50}}
+                style={{zIndex: 1}}
                 data={this.state.dataSource} 
                 showsVerticalScrollIndicator = {false}
                 initialNumToRender={10}
@@ -99,16 +116,12 @@ export default class Game extends React.Component {
                         data={item.data}
                         extraData={this.state}
                         keyExtractor={(item, index) => 'key'+index}
-                        getItemLayout={(data, index) => (
-                          // 120 是被渲染 item 的高度 ITEM_HEIGHT。
-                          {length: 120, offset: 120 * index, index}
-                        )}
                         renderItem={({item}) =>
                         <View>
                             {item.home.name=="数据乱斗" ? null :
                             <TouchableWithoutFeedback onPress={()=>{
                               if(item.status.id==1)
-                                this.props.navigate('GameDetail', {
+                                this.props.navigation.navigate('GameDetail', {
                                   home_id: item.home.id, 
                                   away_id: item.away.id,
                                   home_score: item.home_score,

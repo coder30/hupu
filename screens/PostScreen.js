@@ -6,7 +6,6 @@ import HTML from 'react-native-render-html';
 import Rectangle from '../components/Rectangle';
 import ScaledImage from '../components/ScaledImage';
 import ImageViewer from 'react-native-image-zoom-viewer';
-
 import {View, Text,Linking, ActivityIndicator, FlatList, StyleSheet, ScrollView, Image, Dimensions ,StatusBar, TouchableWithoutFeedback, Modal} from'react-native';
 
 var images = []
@@ -16,10 +15,6 @@ let lastPick = new Date();
 
 export default class PostScreen extends React.Component {
     static navigationOptions = ({navigation}) =>({  
-        headerStyle: {
-            backgroundColor: '#fff',
-            textAlign: 'center',
-        },
         headerTitle: 
         <TouchableWithoutFeedback onPress={()=>{
             let now = new Date();
@@ -54,12 +49,9 @@ export default class PostScreen extends React.Component {
         var url = "https://bbs.mobileapi.hupu.com/1/7.1.1/threads/getThreadsSchemaInfo?fid="+fid+"&crt="+time+"&night=0&px=1080&sign="+sign+"&nopic=0&time_zone=Asia%2FShanghai&tid="+tid+"&ft=18&nps=3&client=316810195181635&entrance=1"
         var url_light = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadLightReplyList?offline=json&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&client=861608045774351&webp=1"
         var url_reply = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadPostList?offline=json&page=1&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&show_type=default&client=316810195181635&webp=1"
-        console.log(url_reply);
-        console.log(url_light);
         return fetch(url)
             .then((Response)=>Response.json())
             .then(async (ResponseJson) =>{
-                console.log(url);
                 this.props.navigation.setParams({ title: ResponseJson.forum_name })
                 var result = await fetch(url_light)
                 var resultJson_light = await result.json();
@@ -73,6 +65,9 @@ export default class PostScreen extends React.Component {
                     replySource: resultJson_reply.data.result
                 })
             })
+    }
+    componentWillUnmount(){
+        StatusBar.setBarStyle('light-content');
     }
     _scrollToTop = () => {
         if(!!this.listRef){
