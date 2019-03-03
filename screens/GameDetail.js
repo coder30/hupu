@@ -2,7 +2,7 @@ import React from 'react';
 import { Font } from 'expo';
 import  MD5  from 'react-native-md5';
 var DomParser = require('dom-parser');
-import HTML from 'react-native-render-html';
+import {createMaterialTopTabNavigator} from 'react-navigation';
 import { logo, chineseName, color, chineseShortName, teamVertical, teamVerticalChinese } from '../constants/Team';
 import { WebView,Modal, View, StyleSheet, Text, Image, ActivityIndicator,Dimensions,StatusBar,Platform,ImageBackground,ScrollView, FlatList, TouchableWithoutFeedback, Linking} from 'react-native';
 var tabColor = ['#fff', '#C01E2F', '#fff'];

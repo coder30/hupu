@@ -5,7 +5,6 @@ import { logo, name } from '../constants/Team';
 import LogoTitle from '../components/LogoTitle';
 import {Text, View, FlatList, Image, TouchableOpacity, ImageBackground, StyleSheet,ActivityIndicator,RefreshControl ,Dimensions, ScrollView, TouchableWithoutFeedback} from 'react-native';
 
-
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     headerTitle: <LogoTitle />,
@@ -37,14 +36,11 @@ export default class HomeScreen extends React.Component {
             break;
         }
         var news = ResponseJson.result.data.slice(i);
-        var temp=[]
         for(var i=0; i<news.length; i++){
           if(news[i].title.indexOf('[广告]')!=-1||news[i].title.indexOf('[场下]')!=-1||news[i].title.indexOf('[场上]')!=-1)
             news.splice(i,1);
           else if(news[i].badge && news[i].badge[0].name=='广告')
             news.splice(i,1);
-          else
-            temp.push('black');
         }
         if(ResponseJson.result.game.game_lists.length%2 && ResponseJson.result.game.game_lists.length!=1){
           ResponseJson.result.game.game_lists.pop();
@@ -80,7 +76,6 @@ export default class HomeScreen extends React.Component {
   _onRefresh() {
     this.setState({
       isRefreshing: true,
-      color: []
     });
     this.getData();
     this.setState({
@@ -104,21 +99,17 @@ export default class HomeScreen extends React.Component {
           .then((Response)=>Response.json())
           .then((ResponseJson)=>{
             console.log(url);
-            var temp = this.state.color;
             for(var i=0; i<ResponseJson.result.data.length; i++){
               if(ResponseJson.result.data[i].title.indexOf('[广告]')!=-1||ResponseJson.result.data[i].title.indexOf('[场下]')!=-1||ResponseJson.result.data[i].title.indexOf('[场上]')!=-1)
                 ResponseJson.result.data.splice(i,1);
               else if(ResponseJson.result.data[i].badge && ResponseJson.result.data[i].badge[0].name=='广告')
                 ResponseJson.result.data.splice(i,1);
-              else
-                temp.push('black')
             }
             var result = this.state.newSource.concat(ResponseJson.result.data)
             this.setState({
               newSource: result,
               nid: ResponseJson.result.data[ResponseJson.result.data.length-1].nid,
               flag: true,
-              color: temp
             })
           })
       }
@@ -255,13 +246,13 @@ export default class HomeScreen extends React.Component {
               renderItem={({item, index}) =>
               <TouchableOpacity style={{flexDirection:'row', paddingTop:10, paddingBottom:10, marginBottom:4}} onPress={() =>  {
                 var temp = this.state.color;
-                temp[index] = 'rgba(0, 0, 0, 0.38)';
+                temp[item.nid] = 'rgba(0, 0, 0, 0.38)';
                 this.setState({color: temp});
                 item.type==1?navigation.navigate('News', { nid: item.nid, replies: item.replies}): navigation.navigate('Details', { name:'湿乎乎的话题',fid: 1048, tid: item.link.slice(19,27)})}
                 }>
                 <Image source={{uri:item.img.slice(0,item.img.indexOf('?'))||item.thumbs&&item.thumbs[0]}} style={{width:90, height:70}} />
                 <View style={{flexDirection:"column", justifyContent: "space-between", flex:1}}>
-                  <Text style={{marginLeft:10, color: this.state.color[index]}}>{item.title}</Text>
+                  <Text style={{marginLeft:10, color: this.state.color[item.nid]}}>{item.title}</Text>
                   <View style={{flexDirection:"row", marginLeft:10}}>
                     <Image source={require('../assets/images/comment.png')} style={{width: 18, height:18, opacity:0.38, marginRight: 3}}/>
                     <Text style={{marginRight: 5, color:'rgba(0, 0, 0, 0.38)', fontSize: 10, lineHeight:18}}>{item.replies}</Text>
