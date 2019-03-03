@@ -14,7 +14,6 @@ export default class Plate extends React.Component {
         fetch(url)
           .then((Response)=>Response.json())
           .then((ResponseJson)=>{
-            console.log(url);
             this.setState({
               isLoading: false,
               forumData: ResponseJson.data,
@@ -55,13 +54,12 @@ export default class Plate extends React.Component {
                   </TouchableWithoutFeedback>
                 }/>
               </View>
-              <View style={{margin: 10, marginBottom:70}}>
+              <View style={{padding: 10, paddingBottom:0}}>
                 <FlatList 
                 showsVerticalScrollIndicator = {false}
                 extraData={this.state}
                 data={this.state.forumData[this.state.plate].sub}
                 keyExtractor={(item, index) => 'key'+index}
-                style={{marginBottom: 20}}
                 renderItem={({item,index}) =>
                 <View>
                   <View style={{borderBottomColor: 'rgba(0, 0, 0, 0.05)', borderBottomWidth:0.3, borderStyle:'solid', paddingBottom: 10, marginBottom:5}}>  

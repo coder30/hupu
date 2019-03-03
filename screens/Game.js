@@ -111,7 +111,8 @@ const MyNavigator = createMaterialTopTabNavigator({
   Tab6: Injury,
   Tab7: Honour,
 },{
-  tabBarComponent:MaterialTopTabBarWithStatusBar
+  tabBarComponent:MaterialTopTabBarWithStatusBar,
+  lazy :true
 })
 export default class SettingsScreen extends React.Component {
   static navigationOptions = {

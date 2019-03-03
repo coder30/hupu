@@ -1,6 +1,6 @@
 import React from 'react';
 import  MD5  from "react-native-md5";
-import { View, FlatList ,ActivityIndicator, Text, StyleSheet, Image, TouchableOpacity, ImageBackground, TouchableWithoutFeedback, Dimensions} from 'react-native';
+import { View, FlatList , Text, StyleSheet, Image, TouchableOpacity, ImageBackground, TouchableWithoutFeedback} from 'react-native';
 import LogoTitle from '../components/LogoTitle';
 import Plate from '../components/Plate';
 import {createMaterialTopTabNavigator} from 'react-navigation';
