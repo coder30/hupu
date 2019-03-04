@@ -1,10 +1,17 @@
 import React from 'react';
 import  MD5  from "react-native-md5";
-import { View, FlatList , Text, StyleSheet, Image, TouchableOpacity, ImageBackground, TouchableWithoutFeedback} from 'react-native';
+import { View, FlatList , Text, StyleSheet, Image, TouchableOpacity, ImageBackground, ActivityIndicator} from 'react-native';
 import LogoTitle from '../components/LogoTitle';
 import Plate from '../components/Plate';
 import {createMaterialTopTabNavigator} from 'react-navigation';
 let nav;
+class Loader extends React.Component {
+  render() {
+    return <View style={{flex: 1, padding: 20}}>
+      <ActivityIndicator color ="#C01E2F"/>
+    </View>
+  }
+}
 class Tab1 extends React.Component {
   constructor(props){
     super(props);
@@ -99,6 +106,7 @@ class Tab1 extends React.Component {
       onEndReachedThreshold={0.5} 
       onEndReached={this.onEndReached.bind(this)} 
       onMomentumScrollBegin={() => { this.onEndReachedCalledDuringMomentum = false; }} 
+      ListFooterComponent={Loader}
       renderItem={({item,index}) =>
         <TouchableOpacity  style={styles.card} onPress={() => { 
           var temp = this.state.color;
@@ -107,8 +115,8 @@ class Tab1 extends React.Component {
           navigation.navigate('Details', { fid: item.fid, tid: item.tid, name: item.forum_name, logo: item.forum_logo})} 
         }>
           <View style={{ paddingBottom:5, flexDirection: 'row', paddingTop:5}}>
-            <Image source={{uri: item.topic.logo||item.forum_logo}} style={{width: 25, height: 23, marginRight:5, borderRadius: 5}}/>
-            <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12, height:25, lineHeight:25}}>{item.topic.topic_name||item.forum_name}</Text>
+            <Image source={{uri: item.topic&&item.topic.logo||item.forum_logo}} style={{width: 25, height: 23, marginRight:5, borderRadius: 5}}/>
+            <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12, height:25, lineHeight:25}}>{item.topic&&item.topic.topic_name||item.forum_name}</Text>
             <Text style={{color:'rgba(0, 0, 0, 0.38)', fontSize: 10, paddingLeft: 12, height:25, lineHeight:25}}>{item.userName}</Text>
           </View>
           <Text  style={{fontSize: 15, marginBottom: 5, color: this.state.color[item.tid]}}>{item.title}</Text>
@@ -130,40 +138,58 @@ class Tab1 extends React.Component {
     );
   }
 }
-function MaterialTopTabBarWithStatusBar(props) {
-  return (
-    <View>
-    {props.navigationState.index?
-      <View style={{flexDirection: 'row', alignItems:'center'}}>
-        <TouchableWithoutFeedback onPress={()=>props.navigation.navigate('TabOne')}>
-            <Text style={{color:'rgba(0, 0, 0, 0.54)', textAlign: 'center', minWidth: 60, marginLeft: 10}}>关注</Text>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={()=>props.navigation.navigate('TabTwo')}>
-            <ImageBackground source={require('../assets/images/Rectangle.png')} style={{width:60, height: 22 ,margin: 12, alignItems: 'center'}}>
-              <Text style={{color:'#FFFFFF', textAlign: 'center', lineHeight:22}}>板块</Text>
-            </ImageBackground>
-          </TouchableWithoutFeedback>
-      </View>:
-      <View style={{flexDirection: 'row', alignItems:'center'}}>
-          <TouchableWithoutFeedback onPress={()=>props.navigation.navigate('TabOne')}>
-            <ImageBackground source={require('../assets/images/Rectangle.png')} style={{width:60, height: 22 ,margin: 12, alignItems: 'center'}}>
-              <Text style={{color:'#FFFFFF', textAlign: 'center', lineHeight:22}}>关注</Text>
-            </ImageBackground>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={()=>props.navigation.navigate('TabTwo')}>
-            <Text style={{color:'rgba(0, 0, 0, 0.54)', textAlign: 'center', minWidth: 60}}>板块</Text>
-          </TouchableWithoutFeedback>
-      </View>
-    }
+class Rectangle extends React.Component {
+  render() {
+    return <ImageBackground source={require('../assets/images/Rectangle.png')} style={{width:60, height: 22 ,margin: 12, alignItems: 'center'}}>
+      <Text style={{color:'#FFFFFF', textAlign: 'center', lineHeight:22}}>{this.props.name}</Text>
+    </ImageBackground>
+  }
+}
+class Tint extends React.Component {
+  render() {
+    return <View style={{height:22, width:57}}>
+      <Text style={{ color:"rgba(0, 0, 0, 0.54)", lineHeight: 22, textAlign: 'center'}}>{this.props.name}</Text>
     </View>
-  );
+  }
 }
 const MyNavigator = createMaterialTopTabNavigator({
-  TabOne: Tab1,
-  TabTwo: Plate,
+  TabOne: {
+    screen:Tab1,
+    navigationOptions: {
+      tabBarIcon: ({tintColor, focused}) => {
+          if(focused)
+            return (<Rectangle name={'关注'}/>)
+          else 
+            return (<Tint name={'关注'}/>)
+      },
+    }
+  },
+  TabTwo: {
+    screen:Plate,
+    navigationOptions: {
+      tabBarIcon: ({tintColor, focused}) => {
+          if(focused)
+            return (<Rectangle name={'板块'}/>)
+          else 
+            return (<Tint name={'板块'}/>)
+      },
+    }
+  },
 },{
-  tabBarComponent:MaterialTopTabBarWithStatusBar,
-  lazy :true
+  lazy :true,
+  tabBarOptions:{
+    scrollEnabled: true,
+    showIcon: true,
+    showLabel: false,
+    indicatorStyle: {
+      height: 2,
+      backgroundColor: 'white',
+    },//标签指示器的样式
+    tabStyle :{width:80, height:45},
+    style: {
+      backgroundColor: '#fff',//TabBar 的背景颜色
+    },
+  },
 })
 export default class SettingsScreen extends React.Component {
   static navigationOptions = {

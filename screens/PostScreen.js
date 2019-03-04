@@ -29,6 +29,7 @@ export default class PostScreen extends React.Component {
         </TouchableWithoutFeedback>,
         headerTintColor: 'rgba(0, 0, 0, 0.54)',
         gesturesEnabled: true,
+        gestureResponseDistance: 45
     });  
     constructor(props){
         super(props);
@@ -178,7 +179,6 @@ export default class PostScreen extends React.Component {
                 }
                 <Modal
                 visible={this.state.modalVisible}
-                style={{position: 'absolute', width: '100%', height: '100%', backgroundColor: 'black'}}
                 transparent={false}
                 animationType={"fade"}
                 onRequestClose={() => this.setState({ modalVisible: false })}
