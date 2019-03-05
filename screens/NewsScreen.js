@@ -156,7 +156,7 @@ export default class NewsScreen extends React.Component {
             </Modal>
             
             <HeaderImageScrollView
-                maxHeight={250}
+                maxHeight={300}
                 minHeight={MIN_HEIGHT+StatusBar.currentHeight}
                 headerImage={{uri: this.state.dataSource.img_m.slice(0,this.state.dataSource.img_m.indexOf('?'))}}
                 showsVerticalScrollIndicator = {false} onMomentumScrollEnd = {this._contentViewScroll.bind(this)}
