@@ -1,14 +1,17 @@
 import React from 'react';
-import { Platform } from 'react-native';
 import MD5  from"react-native-md5";
+import { Header } from 'react-navigation';
 import HTML from 'react-native-render-html';
-import ImageViewer from 'react-native-image-zoom-viewer';
-import ScaledImage from '../components/ScaledImage';
 import Rectangle from '../components/Rectangle';
-import {ScrollView, Modal, View, FlatList ,ActivityIndicator, Text, StyleSheet, Image, TouchableWithoutFeedback, Dimensions, ImageBackground, StatusBar, Linking } from 'react-native';
+import ScaledImage from '../components/ScaledImage';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import HeaderImageScrollView, { TriggeringView } from 'react-native-image-header-scroll-view';
+import {ScrollView, Platform, Modal, View, FlatList ,ActivityIndicator, Text, StyleSheet, Image, TouchableWithoutFeedback, Dimensions, StatusBar, Linking } from 'react-native';
 
+let flag = true;
 const images = [];
-var flag = true;
+const MIN_HEIGHT = Header.HEIGHT;
+
 export default class NewsScreen extends React.Component {
     static navigationOptions = {
         headerTransparent: true,
@@ -19,7 +22,7 @@ export default class NewsScreen extends React.Component {
         super(props);
         this.state = {isLoading: true, nid: 0, count: 0,modalVisible: false, index:0};
     }
-    async componentDidMount() {
+    async componentWillMount() {
         flag = true;
         const { navigation } = this.props;
         const nid = navigation.getParam('nid');
@@ -42,7 +45,8 @@ export default class NewsScreen extends React.Component {
                     dataSource: ResponseJson.result.offline_data.data.news,
                     replySource: result.data,
                     ncid: result.data.data.length && result.data.data[result.data.data.length-1].ncid,
-                    create_time: result.data.data.length && result.data.data[result.data.data.length-1].create_time
+                    create_time: result.data.data.length && result.data.data[result.data.data.length-1].create_time,
+                    hasNextPage: result.data.hasNextPage
                 })
             })
     }
@@ -80,7 +84,6 @@ export default class NewsScreen extends React.Component {
                     <TouchableWithoutFeedback key={htmlAttribs.src} onPress={() =>this.setState({ modalVisible: true, index:i })}>
                         <ScaledImage uri={htmlAttribs.src} width={w}/>             
                     </TouchableWithoutFeedback>
-                    
                 ) 
             }
         }
@@ -101,14 +104,13 @@ export default class NewsScreen extends React.Component {
         var offsetY = e.nativeEvent.contentOffset.y; //滑动距离
         var contentSizeHeight = e.nativeEvent.contentSize.height; //scrollView contentSize高度
         var oriageScrollHeight = e.nativeEvent.layoutMeasurement.height; //scrollView高度
-        if (offsetY + oriageScrollHeight >= contentSizeHeight-800){
+        if (offsetY + oriageScrollHeight >= contentSizeHeight-10){
             const { navigation } = this.props;
             const nid = navigation.getParam('nid');
             if(flag){
                 flag = false;
                 var url_reply = "http://games.mobileapi.hupu.com/1/7.3.2/news/getCommentH5?offline=json&nid="+nid+"&top_ncid=-1&client=861608045774351&webp=1&ncid="+this.state.ncid+"&create_time=" + this.state.create_time;
                 var result = await fetch(url_reply);
-                console.log(url_reply);
                 result = await result.json();
                 var list = this.state.replySource.data.concat(result.data.data);
                 this.state.replySource.data = list; 
@@ -132,8 +134,7 @@ export default class NewsScreen extends React.Component {
             )
         }
         return(
-            <View>
-            <View style={{backgroundColor: 'black', height: StatusBar.currentHeight}}></View>
+            <View style={styles.container}>
             <Modal
                 visible={this.state.modalVisible}
                 transparent={false}
@@ -153,87 +154,94 @@ export default class NewsScreen extends React.Component {
                     enablePreload={true}
                 />
             </Modal>
-            <ScrollView showsVerticalScrollIndicator = {false} onMomentumScrollEnd = {this._contentViewScroll.bind(this)}>
-                <Image source={{uri: this.state.dataSource.img_m.slice(0,this.state.dataSource.img_m.indexOf('?'))}} resizeMode='cover' style={{ width:Dimensions.get("window").width, height: Dimensions.get("window").width*202/360, justifyContent:'center', alignItems:'center', backgroundColor: '#E5E5E5'}} />
-                <View style={{padding: 10}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 20, marginBottom: 10}}>{this.state.dataSource.title}</Text>
-                    <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>来源:{this.state.dataSource.origin}   {this.state.dataSource.addtime}</Text>
-                    <HTML html={this.state.dataSource.content} alterNode={this.alterNode} renderers={this.renderers()} onLinkPress={(evt, href)=>Linking.openURL(href)}/>  
-                </View>
-                {this.state.replySource.count=="0" || this.state.replySource.light_comments.length==0?null:
-                <View>
-                    <Rectangle type="light"/>  
-                    <FlatList
-                        data={this.state.replySource.light_comments}
-                        keyExtractor={(item, index) => 'key'+index}
-                        renderItem={({item}) =>
-                        <View style={styles.card}>
-                            <Image source={{uri: item.header}} style={styles.header}/>
-                            <View style={{flex:1, marginBottom: 4}}>
-                                <View style={{flexDirection:'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                                        <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5}}>{item.user_name}</Text>
-                                        <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>{item.format_time}</Text>
+            
+            <HeaderImageScrollView
+                maxHeight={250}
+                minHeight={MIN_HEIGHT+StatusBar.currentHeight}
+                headerImage={{uri: this.state.dataSource.img_m.slice(0,this.state.dataSource.img_m.indexOf('?'))}}
+                showsVerticalScrollIndicator = {false} onMomentumScrollEnd = {this._contentViewScroll.bind(this)}
+            >
+                <ScrollView>
+                    <View style={{padding: 10}}>
+                        <Text style={{fontWeight: 'bold', fontSize: 20, marginBottom: 10}}>{this.state.dataSource.title}</Text>
+                        <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>来源:{this.state.dataSource.origin}   {this.state.dataSource.addtime}</Text>
+                        <HTML html={this.state.dataSource.content} alterNode={this.alterNode} renderers={this.renderers()} onLinkPress={(evt, href)=>Linking.openURL(href)}/>  
+                    </View>
+                    {this.state.replySource.count=="0" || this.state.replySource.light_comments.length==0?null:
+                    <View>
+                        <Rectangle type="light"/>  
+                        <FlatList
+                            data={this.state.replySource.light_comments}
+                            keyExtractor={(item, index) => 'key'+index}
+                            renderItem={({item}) =>
+                            <View style={styles.card}>
+                                <Image source={{uri: item.header}} style={styles.header}/>
+                                <View style={{flex:1, marginBottom: 4}}>
+                                    <View style={{flexDirection:'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                                        <View style={{flexDirection:'row', alignItems:'center'}}>
+                                            <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5}}>{item.user_name}</Text>
+                                            <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>{item.format_time}</Text>
+                                        </View>
+                                        <View style={{flexDirection:'row', alignItems:'center'}}>
+                                            <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5, fontSize: 11}}>{item.light_count}</Text>
+                                            <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
+                                        </View>
                                     </View>
-                                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                                        <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5, fontSize: 11}}>{item.light_count}</Text>
-                                        <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
+                                    {item.quote_data?
+                                    <View style={styles.quote}>
+                                        <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12}}>{item.quote_data.user_name}</Text>
+                                        <HTML html={item.quote_data.content} style={{padding: 10}} imagesMaxWidth={Dimensions.get("window").width-75} alterNode={this.alterNode_quote} onLinkPress={(evt, href)=>Linking.openURL(href)}/>
                                     </View>
+                                    :null
+                                    }
+                                    <HTML html={item.content} style={{padding: 10}}  imagesMaxWidth={Dimensions.get("window").width-65} alterNode={this.alterNode_reply} onLinkPress={(evt, href)=>Linking.openURL(href)}/>  
                                 </View>
-                                {item.quote_data?
-                                <View style={styles.quote}>
-                                    <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12}}>{item.quote_data.user_name}</Text>
-                                    <HTML html={item.quote_data.content} style={{padding: 10}} imagesMaxWidth={Dimensions.get("window").width-75} alterNode={this.alterNode_quote} onLinkPress={(evt, href)=>Linking.openURL(href)}/>
-                                </View>
-                                :null
-                                }
-                                <HTML html={item.content} style={{padding: 10}}  imagesMaxWidth={Dimensions.get("window").width-65} alterNode={this.alterNode_reply} onLinkPress={(evt, href)=>Linking.openURL(href)}/>  
                             </View>
-                        </View>
-                        }
-                    />
-                </View>
-                }
-                {this.state.replySource.count==0?<Text>没有评论</Text>:
-                <View style={{marginBottom: 30}}>
-                    <Rectangle type="reply"/>
-                    <FlatList
-                        data={this.state.replySource.data}
-                        keyExtractor={(item, index) => 'key'+index}
-                        renderItem={({item}) =>
-                        <View style={styles.card}>
-                            <Image source={{uri: item.header}} style={styles.header}/>
-                            <View style={{flex:1, marginBottom: 4}}>
-                                <View style={{flexDirection:'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                                        <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5}}>{item.user_name}</Text>
-                                        <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>{item.format_time}</Text>
-                                    </View>
-                                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                                        <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5, fontSize: 11}}>{item.light_count}</Text>
-                                        <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
-                                    </View>
-                                </View>
-                                {item.quote_data?
-                                <View style={styles.quote}>
-                                    <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12}}>{item.quote_data.user_name}</Text>
-                                    <HTML html={item.quote_data.content} style={{padding: 10}} imagesMaxWidth={Dimensions.get("window").width-75} alterNode={this.alterNode_quote} onLinkPress={(evt, href)=>Linking.openURL(href)}/>
-                                </View>
-                                :null
-                                }
-                                <HTML html={item.content} style={{padding: 10}}  imagesMaxWidth={Dimensions.get("window").width-65} alterNode={this.alterNode_reply}/>  
-                            </View>
-                        </View>
-                        }
-                    />
-                    {!this.state.hasNextPage?null:
-                        <View style={{flex: 1, padding: 50}}>
-                        <ActivityIndicator color ="#C01E2F"/>
-                        </View>
+                            }
+                        />
+                    </View>
                     }
-                </View>
-                }
-            </ScrollView>
+                    {this.state.replySource.count==0?<Text>没有评论</Text>:
+                    <View style={{marginBottom: 30}}>
+                        <Rectangle type="reply"/>
+                        <FlatList
+                            data={this.state.replySource.data}
+                            keyExtractor={(item, index) => 'key'+index}
+                            renderItem={({item}) =>
+                            <View style={styles.card}>
+                                <Image source={{uri: item.header}} style={styles.header}/>
+                                <View style={{flex:1, marginBottom: 4}}>
+                                    <View style={{flexDirection:'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                                        <View style={{flexDirection:'row', alignItems:'center'}}>
+                                            <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5}}>{item.user_name}</Text>
+                                            <Text style={{color: 'rgba(0, 0, 0, 0.54)', fontSize: 10}}>{item.format_time}</Text>
+                                        </View>
+                                        <View style={{flexDirection:'row', alignItems:'center'}}>
+                                            <Text style={{color: 'rgba(0, 0, 0, 0.54)', marginRight: 5, fontSize: 11}}>{item.light_count}</Text>
+                                            <Image source={require('../assets/images/light.png')} style={{width: 18, height: 18, marginRight:3, tintColor :'rgba(0, 0, 0, 0.38)', alignItems: 'center'}}/>
+                                        </View>
+                                    </View>
+                                    {item.quote_data?
+                                    <View style={styles.quote}>
+                                        <Text style={{color:'rgba(0, 0, 0, 0.54)', fontSize: 12}}>{item.quote_data.user_name}</Text>
+                                        <HTML html={item.quote_data.content} style={{padding: 10}} imagesMaxWidth={Dimensions.get("window").width-75} alterNode={this.alterNode_quote} onLinkPress={(evt, href)=>Linking.openURL(href)}/>
+                                    </View>
+                                    :null
+                                    }
+                                    <HTML html={item.content} style={{padding: 10}}  imagesMaxWidth={Dimensions.get("window").width-65} alterNode={this.alterNode_reply}/>  
+                                </View>
+                            </View>
+                            }
+                        />
+                        {this.state.hasNextPage==0?null:
+                            <View style={{flex: 1, padding: 10}}>
+                                <ActivityIndicator color ="#C01E2F"/>
+                            </View>
+                        }
+                    </View>
+                    }
+                </ScrollView>
+            </HeaderImageScrollView>
             </View>
         )
     }
@@ -268,5 +276,12 @@ const styles = StyleSheet.create({
                 borderRadius:50
             },
         }), 
-    }
+    },
+    container: {
+        flex: 1,
+      },
+      image: {
+        height: 200,
+        width: Dimensions.get('window').width,
+      },
 })

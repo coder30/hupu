@@ -162,7 +162,6 @@ export default class HomeScreen extends React.Component {
                   <Image source={require('../assets/images/topic.png')} style={{width: 57, height: 22, margin:10}}/>
                   :<View></View>
                   }
-                  
                   <View style={{padding:10, backgroundColor:'rgba(0, 0, 0, 0.54)'}}>
                     <Text style={{color:'#FFFFFF'}}>{item.title}</Text>
                     <View style={{flexDirection:'row', alignContent: 'center', marginTop: 10, color:'rgba(0, 0, 0, 0.38)'}}>

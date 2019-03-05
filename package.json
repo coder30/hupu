@@ -19,6 +19,7 @@
     "react": "16.5.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
     "react-native-html-parser": "0.0.5",
+    "react-native-image-header-scroll-view": "^0.10.1",
     "react-native-image-zoom-viewer": "^2.2.25",
     "react-native-md5": "^1.0.0",
     "react-native-render-html": "^3.10.0",
