@@ -4,6 +4,7 @@ import Game from '../components/Game';
 import Player from '../components/Player';
 import Injury from '../components/Injury';
 import Honour from '../components/Honour';
+import Parallelogram from '../components/Line';
 import LogoTitle from '../components/LogoTitle';
 import {createMaterialTopTabNavigator} from 'react-navigation';
 
@@ -45,7 +46,7 @@ const MyNavigator = createMaterialTopTabNavigator({
     navigationOptions: {
       tabBarIcon: ({tintColor, focused}) =>{
         if(focused)
-          return (<Rectangle index={0}/>)
+          return (<Parallelogram name={tab[0].name} height={22}/>)
         else 
           return (<Tint index={0}/>)
       },
@@ -56,7 +57,7 @@ const MyNavigator = createMaterialTopTabNavigator({
     navigationOptions: {
       tabBarIcon: ({tintColor, focused}) => {
           if(focused)
-            return (<Rectangle index={1}/>)
+            return (<Parallelogram name={tab[1].name} height={22}/>)
           else 
             return (<Tint index={1}/>)
       },
@@ -67,7 +68,7 @@ const MyNavigator = createMaterialTopTabNavigator({
     navigationOptions: {
       tabBarIcon: ({tintColor, focused}) => {
           if(focused)
-            return (<Rectangle index={2}/>)
+            return (<Parallelogram name={tab[2].name} height={22}/>)
           else 
             return (<Tint index={2}/>)
       },
@@ -78,7 +79,7 @@ const MyNavigator = createMaterialTopTabNavigator({
     navigationOptions: {
       tabBarIcon: ({tintColor, focused}) => {
           if(focused)
-            return (<Rectangle index={3}/>)
+            return (<Parallelogram name={tab[3].name} height={22}/>)
           else 
             return (<Tint index={3}/>)
       },
@@ -89,7 +90,7 @@ const MyNavigator = createMaterialTopTabNavigator({
     navigationOptions: {
       tabBarIcon: ({tintColor, focused}) => {
           if(focused)
-            return (<Rectangle index={4}/>)
+            return (<Parallelogram name={tab[4].name} height={22}/>)
           else 
             return (<Tint index={4}/>)
       },
@@ -100,7 +101,7 @@ const MyNavigator = createMaterialTopTabNavigator({
     navigationOptions: {
       tabBarIcon: ({tintColor, focused}) => {
           if(focused)
-            return (<Rectangle index={5}/>)
+            return (<Parallelogram name={tab[5].name} height={22}/>)
           else 
             return (<Tint index={5}/>)
       },
@@ -111,7 +112,7 @@ const MyNavigator = createMaterialTopTabNavigator({
     navigationOptions: {
       tabBarIcon: ({tintColor, focused}) => {
           if(focused)
-            return (<Rectangle index={6}/>)
+            return (<Parallelogram name={tab[6].name} height={22}/>)
           else 
             return (<Tint index={6}/>)
       },
