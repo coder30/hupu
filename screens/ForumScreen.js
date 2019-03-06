@@ -15,7 +15,7 @@ class Loader extends React.Component {
 class Tab1 extends React.Component {
   constructor(props){
     super(props);
-    this.state = {isLoading: true, stamp: 0, lastTid: 0, flag: true, color: [], tab:0, plate: 0, addition_tid:-1};
+    this.state = {isLoading: false, stamp: 0, lastTid: 0, flag: true, color: [], tab:0, plate: 0, addition_tid:-1};
   }
   getData() {
     var time = new Date().getTime();

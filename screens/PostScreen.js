@@ -7,21 +7,14 @@ import Rectangle from '../components/Rectangle';
 import ScaledImage from '../components/ScaledImage';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import {View, Text,Linking, ActivityIndicator, FlatList, StyleSheet, ScrollView, Image, Dimensions ,StatusBar, TouchableWithoutFeedback, Modal} from'react-native';
-
-var images = []
-var flag = true;
-var page=2;
-let lastPick = new Date();
-
 export default class PostScreen extends React.Component {
     static navigationOptions = ({navigation}) =>({  
         headerTitle: 
         <TouchableWithoutFeedback onPress={()=>{
             let now = new Date();
-            if(now - lastPick < 500){
+            if(now - this.lastPick < 500)
                 navigation.getParam('_scrollToTop', '')();
-            }
-            lastPick = now;
+            this.lastPick = now;
         }}>
             <View style={{justifyContent: 'center', flex: 1}}>
                 <Text style={{textAlign: 'center',marginLeft:-50,fontSize:18,fontWeight: '300', color: 'rgba(0, 0, 0, 0.54)'}}>{navigation.getParam('title', '')}</Text>
@@ -36,20 +29,22 @@ export default class PostScreen extends React.Component {
         this.state = {isLoading: true, modalVisible: false, index:0,isPortrait: true}
     }
     async componentDidMount() {
-        this.props.navigation.setParams({ _scrollToTop: this._scrollToTop })
-        page=2;
-        flag = true;
-        images=[];
+        this.page=2;
+        this.images=[];
+        this.flag = true;
+        this.lastPick = 0;
+        this.mounted = true;
+        this.props.navigation.setParams({ _scrollToTop: this._scrollToTop });
         StatusBar.setBarStyle('dark-content');
         const { navigation } = this.props;
         const fid = navigation.getParam('fid');
         const tid = navigation.getParam('tid');
-        var time = new Date().getTime();
-        var res = "client=316810195181635&crt=" + time +"&entrance=1&fid="+ fid +"&ft=18&night=0&nopic=0&nps=3&px=1080&tid="+tid+"&time_zone=Asia/ShanghaiHUPU_SALT_AKJfoiwer394Jeiow4u309"
-        var sign = MD5.hex_md5(res);
-        var url = "https://bbs.mobileapi.hupu.com/1/7.1.1/threads/getThreadsSchemaInfo?fid="+fid+"&crt="+time+"&night=0&px=1080&sign="+sign+"&nopic=0&time_zone=Asia%2FShanghai&tid="+tid+"&ft=18&nps=3&client=316810195181635&entrance=1"
-        var url_light = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadLightReplyList?offline=json&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&client=861608045774351&webp=1"
-        var url_reply = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadPostList?offline=json&page=1&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&show_type=default&client=316810195181635&webp=1"
+        let time = new Date().getTime();
+        let res = "client=316810195181635&crt=" + time +"&entrance=1&fid="+ fid +"&ft=18&night=0&nopic=0&nps=3&px=1080&tid="+tid+"&time_zone=Asia/ShanghaiHUPU_SALT_AKJfoiwer394Jeiow4u309"
+        let sign = MD5.hex_md5(res);
+        let url = "https://bbs.mobileapi.hupu.com/1/7.1.1/threads/getThreadsSchemaInfo?fid="+fid+"&crt="+time+"&night=0&px=1080&sign="+sign+"&nopic=0&time_zone=Asia%2FShanghai&tid="+tid+"&ft=18&nps=3&client=316810195181635&entrance=1"
+        let url_light = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadLightReplyList?offline=json&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&client=861608045774351&webp=1"
+        let url_reply = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadPostList?offline=json&page=1&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&show_type=default&client=316810195181635&webp=1"
         return fetch(url)
             .then((Response)=>Response.json())
             .then(async (ResponseJson) =>{
@@ -59,16 +54,18 @@ export default class PostScreen extends React.Component {
                 result = await fetch(url_reply)
                 var resultJson_reply = await result.json();
                 ResponseJson.offline_data.data.content = ResponseJson.offline_data.data.content.replace("<div><a  class=\"app_tips_hide\" href=\"https://mobile.hupu.com/download/games/?r=newsThreadBBall\" target=\"_blank\">下载能看专业及时的新闻，还能实时查看球员赛场投篮点分布图的篮球App</a></div><br /><br />", "")
-                this.setState({
-                    isLoading: false,
-                    dataSource: ResponseJson,
-                    lightSource: resultJson_light.data,
-                    replySource: resultJson_reply.data.result
-                })
+                if(this.mounted)
+                    this.setState({
+                        isLoading: false,
+                        dataSource: ResponseJson,
+                        lightSource: resultJson_light.data,
+                        replySource: resultJson_reply.data.result
+                    })
             })
     }
     componentWillUnmount(){
         StatusBar.setBarStyle('light-content');
+        this.mounted = false;
     }
     _scrollToTop = () => {
         if(!!this.listRef){
@@ -105,12 +102,12 @@ export default class PostScreen extends React.Component {
                 }
                 else
                     h = width * Number(htmlAttribs['data-h']) / Number(htmlAttribs['data-w']);
-                for(var i=0; i<images.length; i++){
-                    if(images[i].url == htmlAttribs.src)
+                for(var i=0; i<this.images.length; i++){
+                    if(this.images[i].url == htmlAttribs.src)
                         break;
                 }
-                if(i == images.length)
-                    images.push({url:htmlAttribs.src})
+                if(i == this.images.length)
+                    this.images.push({url:htmlAttribs.src})
                 if(!h){
                     return (
                         <TouchableWithoutFeedback key={Math.random()} onPress={() => this.setState({ modalVisible: true, index:i})}>
@@ -131,22 +128,24 @@ export default class PostScreen extends React.Component {
         var contentSizeHeight = e.nativeEvent.contentSize.height; //scrollView contentSize高度
         var oriageScrollHeight = e.nativeEvent.layoutMeasurement.height; //scrollView高度
         if (offsetY + oriageScrollHeight >= contentSizeHeight-800){
-            if(flag){
-                flag = false;
+            if(this.flag){
+                this.flag = false;
                 const { navigation } = this.props;
                 const fid = navigation.getParam('fid');
                 const tid = navigation.getParam('tid');
-                var url_reply = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadPostList?offline=json&page="+page+"&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&show_type=default&client=316810195181635&webp=1"
+                var url_reply = "http://bbs.mobileapi.hupu.com/1/7.1.1/threads/getsThreadPostList?offline=json&page="+this.page+"&tid="+tid+"&fid="+fid+"&nopic=0&night=0&order=asc&entrance=&show_type=default&client=316810195181635&webp=1"
                 var result = await fetch(url_reply)
                 var resultJson_reply = await result.json();
                 var list = this.state.replySource.list.concat(resultJson_reply.data.result.list);
                 this.state.replySource.list = list;
-                page++;
-                this.setState({
-                    replySource: this.state.replySource,
-                })
-                if(page<=resultJson_reply.data.result.all_page)
-                    flag = true;
+                this.page++;
+                if(this.mounted){
+                    this.setState({
+                        replySource: this.state.replySource,
+                    })
+                    if(this.page<=resultJson_reply.data.result.all_page)
+                        this.flag = true;
+                }
             }
         }
     }
@@ -184,7 +183,7 @@ export default class PostScreen extends React.Component {
                 onRequestClose={() => this.setState({ modalVisible: false })}
                 >
                 <ImageViewer
-                    imageUrls={images}
+                    imageUrls={this.images}
                     index={this.state.index}
                     onClick={() => {
                         this.setState({ modalVisible: false })
@@ -295,7 +294,7 @@ export default class PostScreen extends React.Component {
                                 </View>
                                 }
                             />
-                            {page>this.state.replySource.all_page?null:
+                            {this.page>this.state.replySource.all_page?null:
                             <View style={{flex: 1, padding: 20}}>
                                 <ActivityIndicator color ="#C01E2F"/>
                             </View>

@@ -20,7 +20,7 @@ export default class Plate extends React.Component {
             })
           })
     }
-    componentWillMount() {
+    componentDidMount() {
         this.getForum();
     }
     render() {

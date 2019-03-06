@@ -5,12 +5,8 @@ import HTML from 'react-native-render-html';
 import Rectangle from '../components/Rectangle';
 import ScaledImage from '../components/ScaledImage';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import HeaderImageScrollView, { TriggeringView } from 'react-native-image-header-scroll-view';
-import {ScrollView, Platform, Modal, View, FlatList ,ActivityIndicator, Text, StyleSheet, Image, TouchableWithoutFeedback, Dimensions, StatusBar, Linking } from 'react-native';
-
-let flag = true;
-const images = [];
-const MIN_HEIGHT = Header.HEIGHT;
+import HeaderImageScrollView from 'react-native-image-header-scroll-view';
+import {ScrollView, Platform, Modal, View, FlatList ,ActivityIndicator, Text, StyleSheet, Image, TouchableWithoutFeedback, Dimensions, Linking } from 'react-native';
 
 export default class NewsScreen extends React.Component {
     static navigationOptions = {
@@ -22,8 +18,13 @@ export default class NewsScreen extends React.Component {
         super(props);
         this.state = {isLoading: true, nid: 0, count: 0,modalVisible: false, index:0};
     }
-    async componentWillMount() {
-        flag = true;
+    componentWillUnmount() {
+        this.mounted = false;
+    }
+    async componentDidMount() {
+        this.flag = true;
+        this.mounted = true;
+        this.images = [];
         const { navigation } = this.props;
         const nid = navigation.getParam('nid');
         const replies = navigation.getParam('replies');
@@ -40,14 +41,15 @@ export default class NewsScreen extends React.Component {
             .then((ResponseJson)=>{
                 console.log(url);
                 ResponseJson.result.offline_data.data.news.content = ResponseJson.result.offline_data.data.news.content.replace("<p><strong>友情提示：您当前使用的是已不再维护的旧版客户端，<a href=\"https://mobile.hupu.com/download/games?_r=updateViaOldVersionContent\">赶紧点这里升级吧 >></a></strong></p>", " ")
-                this.setState({
-                    isLoading: false,
-                    dataSource: ResponseJson.result.offline_data.data.news,
-                    replySource: result.data,
-                    ncid: result.data.data.length && result.data.data[result.data.data.length-1].ncid,
-                    create_time: result.data.data.length && result.data.data[result.data.data.length-1].create_time,
-                    hasNextPage: result.data.hasNextPage
-                })
+                if(this.mounted)
+                    this.setState({
+                        isLoading: false,
+                        dataSource: ResponseJson.result.offline_data.data.news,
+                        replySource: result.data,
+                        ncid: result.data.data.length && result.data.data[result.data.data.length-1].ncid,
+                        create_time: result.data.data.length && result.data.data[result.data.data.length-1].create_time,
+                        hasNextPage: result.data.hasNextPage
+                    })
             })
     }
     alterNode(node) {
@@ -57,6 +59,7 @@ export default class NewsScreen extends React.Component {
         }
         node.attribs = { ...(node.attribs || {}), style: `line-height: 28%; font-size: 18%` };
     }
+
     alterNode_reply(node) {
         const { name } = node;
         if (name == 'img') {
@@ -73,15 +76,16 @@ export default class NewsScreen extends React.Component {
     renderers() {
         return {
             img: (htmlAttribs)=>{
-                var w = Dimensions.get("window").width-20;
-                for(var i=0; i<images.length; i++){
-                    if(images[i].url == htmlAttribs.src)
+                let w = Dimensions.get("window").width-20;
+                let i;
+                for(i=0; i<this.images.length; i++){
+                    if(this.images[i].url == htmlAttribs.src)
                         break;
                 }
-                if(i == images.length)
-                    images.push({url:htmlAttribs.src})
+                if(i == this.images.length)
+                    this.images.push({url:htmlAttribs.src})
                 return (
-                    <TouchableWithoutFeedback key={htmlAttribs.src} onPress={() =>this.setState({ modalVisible: true, index:i })}>
+                    <TouchableWithoutFeedback key={Math.random()} onPress={() =>this.setState({ modalVisible: true, index:i })}>
                         <ScaledImage uri={htmlAttribs.src} width={w}/>             
                     </TouchableWithoutFeedback>
                 ) 
@@ -107,21 +111,23 @@ export default class NewsScreen extends React.Component {
         if (offsetY + oriageScrollHeight >= contentSizeHeight-10){
             const { navigation } = this.props;
             const nid = navigation.getParam('nid');
-            if(flag){
-                flag = false;
+            if(this.flag){
+                this.flag = false;
                 var url_reply = "http://games.mobileapi.hupu.com/1/7.3.2/news/getCommentH5?offline=json&nid="+nid+"&top_ncid=-1&client=861608045774351&webp=1&ncid="+this.state.ncid+"&create_time=" + this.state.create_time;
                 var result = await fetch(url_reply);
                 result = await result.json();
                 var list = this.state.replySource.data.concat(result.data.data);
                 this.state.replySource.data = list; 
-                this.setState({
-                    replySource: this.state.replySource,
-                    ncid: result.data.data.length&&result.data.data[result.data.data.length-1].ncid,
-                    create_time: result.data.data.length&&result.data.data[result.data.data.length-1].create_time,
-                    hasNextPage: result.data.hasNextPage
-                })
-                if(result.data.hasNextPage)
-                    flag = true;
+                if(this.mounted){
+                    this.setState({
+                        replySource: this.state.replySource,
+                        ncid: result.data.data.length&&result.data.data[result.data.data.length-1].ncid,
+                        create_time: result.data.data.length&&result.data.data[result.data.data.length-1].create_time,
+                        hasNextPage: result.data.hasNextPage
+                    })
+                    if(result.data.hasNextPage)
+                        this.flag = true;
+                }
             }
         }
     }
@@ -142,7 +148,7 @@ export default class NewsScreen extends React.Component {
                 animationType={'slide'}
             >
                 <ImageViewer
-                    imageUrls={images}
+                    imageUrls={this.images}
                     index={this.state.index}
                     onClick={() => {
                         this.setState({ modalVisible: false })
@@ -157,7 +163,7 @@ export default class NewsScreen extends React.Component {
             
             <HeaderImageScrollView
                 maxHeight={300}
-                minHeight={MIN_HEIGHT+StatusBar.currentHeight}
+                minHeight={Header.HEIGHT+30}
                 headerImage={{uri: this.state.dataSource.img_m.slice(0,this.state.dataSource.img_m.indexOf('?'))}}
                 showsVerticalScrollIndicator = {false} onMomentumScrollEnd = {this._contentViewScroll.bind(this)}
             >

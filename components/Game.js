@@ -79,16 +79,11 @@ export default class Game extends React.Component {
         this.intervalId = setInterval(() => {
           this.loadData();
         }, 10000);
-        this._startAnimated();
     }
     goIndex = () => {
       this.flatListRef.scrollToIndex({animated: true, index: this.state.index});
     };
     render() {
-      const marginLeft = this.state.animatedValue.interpolate({
-        inputRange: [0,1],
-        outputRange: [-80, 0]
-      })
         if(this.state.isLoading){
             return(
               <View style={{flex: 1, padding: 20}}>
